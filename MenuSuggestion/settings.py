@@ -180,8 +180,8 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "nnjrg842@gmail.com")
 # Googleアカウントで発行した「アプリパスワード」を入力します（通常のパスワードではありません）
 #EMAIL_HOST_PASSWORD = 'nrfl lhcu dhyy nnke'
 #EMAIL_HOST_PASSWORD = 'bflh dviz ubkw zhju'
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "bflh dviz ubkw zhju")
-
+# 新：Renderの金庫（環境変数）から安全に読み込む設定にします
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 # デフォルトの送信元アドレス（任意）
 #DEFAULT_FROM_EMAIL = 'fromcl@1q1q.xyz'
 
