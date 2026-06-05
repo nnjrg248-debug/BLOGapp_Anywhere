@@ -1,0 +1,220 @@
+{% extends 'edit/base.html' %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-body">
+        
+        <h2>{% if form.instance.pk %}Blogを編集{% else %}新規作成{% endif %}</h2>
+<!--↑form.instance.pkについて
+    一番下に記載
+ -->
+        <!--<p id="error-message" style="color: red;">{{ form.title.errors.0 }}</p>-->
+        <form method="POST">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label">{{ field.label }}</label>
+                    <!--↑fieldについて
+                        一番下に記載
+                    -->
+                   
+                    <!-- ここでBootstrapのクラスを追加 -->
+                    <div class="form-control-wrapper">
+                        {{ field }}
+                    </div>
+                    {#--ここからAIボタン追加 フィールドが本文（textやcontent）の場合だけ表示--#}
+                    {% if field.name == 'text' or field.name == 'content' %}
+                        <button type="button" id="ai-btn" class="btn btn-outline-primary btn-sm mt-2">
+                            ✨ AIに続きを書いてもらう
+                        </button>
+                    {% endif %}
+                    {#--ここまで--#}               
+                
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-success">保存する</button>
+            <a href="{% url 'memo_list' %}" class="btn btn-secondary">キャンセル</a>
+        </form>
+    </div>
+</div>
+<style>
+    /* 簡易的に入力欄をBootstrap風にするCSS */
+    input, textarea { width: 100%; border: 1px solid #ced4da; border-radius: 0.375rem; padding: 0.375rem 0.75rem; }
+</style>
+{# JavaScriptを追加 #}
+<script>
+document.getElementById('ai-btn').addEventListener('click', function() {
+    // 1. Djangoの自動生成IDを取得 (nameがtextならid_textになります)
+    // お使いのモデルのフィールド名が 'text' 以外ならここを書き換えてください
+    const textArea = document.getElementById('id_text') || document.getElementById('id_content');
+    
+    if (!textArea) {
+        alert("入力欄が見つかりませんでした。");
+        return;
+    }
+
+    const currentText = textArea.value;
+    const btn = this;
+
+    // ボタンを無効化
+    btn.innerText = "AIが執筆中...";
+    btn.disabled = true;
+
+    // Viewへリクエスト送信
+    fetch("{% url 'ai_generate' %}?text=" + encodeURIComponent(currentText))
+        .then(response => response.json())
+        .then(data => {
+            if (data.result) {
+                // AIの回答を末尾に追加
+                textArea.value += (textArea.value ? "\n\n" : "") + data.result;
+            } else {
+                alert("AIから返答がありませんでした。APIの設定や残高を確認してください。");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("エラーが発生しました。URL設定などを確認してください。");
+        })
+        .finally(() => {
+            btn.innerText = "✨ AIに続きを書いてもらう";
+            btn.disabled = false;
+        });
+});
+
+
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 独自につけた id="error-message" の要素を取得します
+    const errorMessage = document.getElementById('error-message');
+    
+    // エラーメッセージが存在し、かつ中身が空っぽではない場合だけ動かす
+    if (errorMessage && errorMessage.innerText.trim() !== "") {
+        
+        // 画面のどこかをクリックした瞬間に消す
+        document.addEventListener('click', function() {
+            errorMessage.style.display = 'none';
+        }, { once: true });
+
+        // キーボードで何か入力された瞬間に消す
+        document.addEventListener('keydown', function() {
+            errorMessage.style.display = 'none';
+        }, { once: true });
+    }
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Djangoから送られたエラーテキストをJavaScriptに渡す
+    // {{ form.title.errors.0|default:'' }} の内容が存在するかチェック
+    const errorText = "{{ form.title.errors.0|escapejs }}";
+    
+    if (errorText.trim() !== "") {
+        // メッセージボックスを表示
+        alert(errorText);
+    }
+});
+</script>
+
+{% endblock %}
+
+<!--上記 { for field in form }のfieldについて
+views.pyより
+return render(request,'edit/memo_form.html',{'form':form})、return render(request,'edit/memo_form.html',{'form':form})
+としてformが渡されており、HTML側ではform を 「複数の項目の集まり（リストのようなもの）」 として扱う
+for 文で「1つずつ取り出されたもの」が field
+-->
+<!--上記
+ <h2>{ if form.instance.pk }メモを編集{ else }新規作成{ endif }</h2>
+ について
+これは（遷移前の）htmlファイルの遷移先のボタン内に
+遷移先に相当するurlに加え、行番号のidに相当する引数
+が入っていていて、それらを引数として受け取ったformであれば　メモを編集
+そうでなければ　新規作成　と考えたが
+
+実際はurlsのpathの第一引数(に定義する）URLにPKとしての番号が入っているか　で判定しているとのことで
+
+結論から言うと、form.instance は 「URL（path）そのもの」ではなく、「URLのIDを使って、データベースから取り出してきた
+『1件分のデータ本体』とのこと
+
+
+edit/views.pyの
+def memo_edit(request,pk):、def memo_create(request):　を比べて
+
+注：GET、POSTの違い：表示するだけ（GET）、保存したい（POST）の違い
+request.POST：画面の入力欄に書かれた「最新の書き込み内容」
+if request.method == "POST"：「この注文書(request)は、単に画面を見るため？ それとも保存ボタンを押したから？」というチェック
+form = MemoForm(request.POST, instance=memo)：
+    instance=memo: 「土台は『古いデータ（5番）』だよ」　 （memo=get_object_or_404(Memo,pk=pk)という代入なので）
+    request.POST：画面の入力欄に書かれた「最新の書き込み内容」
+form=MemoForm(request.POST)：
+    request.POST：画面の入力欄に書かれた「最新の書き込み内容」   
+form.instance は 「URL（path）そのもの」ではなく、「URLのIDを使って、データベースから取り出してきた『1件分のデータ本体』
+
+注：（上記関数ベースで）最初に型として、form=model(設計したテーブル1件分のデータ)を代入されているので
+form.instanceは型として代入された設計したテーブル1件分のデータということで、土台と表現している
+
+
+-->
+
+<!--上記 { for field in form }(←%つけるとエラーになるので取っている)のfieldについて
+class Memo(models.Model):
+    title = models.CharField(max_length=200)  # タイトル（最大200文字）
+    content = models.TextField()               # メモ本文
+    created_at = models.DateTimeField(auto_now_add=True)  # 作成日時（自動設定）
+    updated_at = models.DateTimeField(auto_now=True)      # 更新日時（自動設定）
+
+    class Meta:
+        db_table='Memo'
+        
+    def __str__(self):
+        return self.title
+    
+    
+というテーブルmemoがformに代入されてるが
+content = models.TextField() というTextFieldフィールドが2つ以上またはなかったらどうなるのか
+
+TextField（や他の項目）が2つ以上ある場合
+
+例えば、content 以外に summary（概要）という項目を増やしたとき
+
+この場合、HTMLの { for field in form } は、自動的に3回ループします。
+1回目：title の入力欄（<input type="text">）
+2回目：summary の入力欄（<textarea>）
+3回目：content の入力欄（<textarea>）
+つまり、あなたがHTMLを書き直さなくても、モデルを書き換えるだけで画面上の入力欄も勝手に増えるのがDjangoの便利なところです。
+2. TextField が一つもない場合
+もし content を消して title だけにした場合、ループは 1回（title分だけ） になります。
+
+3. 「作成日時」などはどうなるの？
+モデルには created_at や updated_at もありますが、これらは通常、画面には出てきません。
+理由：これらは auto_now_add=True などが付いており、「ユーザーが手入力するものではない」 とDjangoが知っているからです。
+結果：form の中には含まれず、{ for field in form } のループでも無視されます。
+
+
+上記コーディングでは
+l15　field.label
+l20　field
+
+となってるがl15　field.labelがない場合は
+l20　fieldにtilte,contentに2フィールドが表示される
+
+{{field.label}}であればCharField
+{{field}}であればTextField
+またはCharField、TextFieldの両方
+（CharFieldがすでに出ていなかったらTextFieldのみ）
+またCharFieldの時は inputタグ（1行）
+fieldの時はtextareaタグ（複数行）
+
+という
+
+
+
+
+
+
+
+
+
+
+-->

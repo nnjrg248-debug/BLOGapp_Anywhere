@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <!-- viewsから渡されるデータによって、タイトルを自動で変える工夫もできます
+     { if form.instance.pk } という書き方を使うと、「すでにIDがあるなら（つまりデータがあるなら）『編集』、
+     ないなら『新規作成』」と見出しを切り替えることも可能-->
+    <h1>{% if form.instance.pk %}メモを編集{% else %}メモを新規作成{% endif %}</h1>
+
+    <form method="POST">
+        {%csrf_token%}
+        {{form.as_p}}↑#フォームをタグ形式で表示
+        <br>
+        <button type="submit">保存する</button>
+    </form>
+
+    <a href="{% url 'memo_list'%}">戻る</a>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block head_title %}認証ページ{% endblock %}</title>
+    <!-- ここにCSSやBootstrapなどを入れると全ての画面に適用されます -->
+</head>
+<body>
+
+    <!-- 共通のナビゲーション（リンク） -->
+    <header style="background: #f4f4f4; padding: 10px; margin-bottom: 20px;">
+         <a href="{% url 'post_list'%}">Ｔｏｐ</a>|
+        <a href="{% url 'account_signup' %}">ユーザー登録</a> | 
+        <a href="{% url 'account_reset_password' %}">パスワードを忘れた場合</a>
+    </header>
+
+    <main style="padding: 20px;">
+        <!-- 各画面（ログインや登録）の中身がここに埋め込まれます -->
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+</html>

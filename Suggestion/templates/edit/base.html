@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Djangoブログ</title>
+    <!-- Bootstrap CSSの読み込み -->
+<!-- 速度遅い場合「htmlファイルのhttps://で始まる行が原因でないか」とのことで以下をコメントにしたらはやくなった　-->
+    <!-- <link href="https://jsdelivr.net" rel="stylesheet"> -->
+</head>
+<body class="bg-light">
+
+ 
+    <!--<nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'memo_list' %}">My Notepad</a>
+       </div>
+    
+    </nav>
+    <div class="flex items-center space-x-4 text-sm text-gray-600"> 
+    <div class="flex justify-start items-center space-x-4 text-sm text-gray-600 w-full">-->
+    <div class="w-full flex justify-end items-center space-x-4 text-sm text-gray-600 pr-4 py-2"></div>      
+        <!-- ログインしている人だけにユーザー名を表示 -->       
+
+        <!-- 未ログインの人も含めて、全員にログアウトを表示 -->
+        <a href="{% url 'post_list' %}" class="text-blue-500 hover:underline">Ｔｏｐ</a>
+         {% if user.is_authenticated %}
+            &nbsp; &nbsp;   <span>👤 {{ user.username }}</span>
+        {% endif %}
+    </div>
+
+    <div class="container">
+        <!-- ここに各ページの中身が流し込まれます -->
+        {% block content %}
+        {% endblock %}
+    </div>
+    <br>
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <!--
+        <div class="container">
+            <a href="{% url 'post_list'%}">ログアウト画面へ</a>
+        </div>
+        -->
+        {% if user.is_authenticated and request.resolver_match.url_name != 'account_delete' %}
+        <a href="{% url 'account_delete' %}" class="text-red-500 hover:underline">
+            退会手続きはこちら
+        </a>
+        {% endif %}
+    </nav>
+</body>
+</html>

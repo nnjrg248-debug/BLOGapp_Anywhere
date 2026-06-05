@@ -1,0 +1,31 @@
+[33m5fa7346[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m エクスポート機能作成
+[33m3e3d6f5[m 検索機能一通り作成３
+[33mf46d49d[m 検索機能一通り作成２
+[33me497d98[m 検索機能一通り作成
+[33md8c41c4[m すべてのユーザーのブログから検索　機能途中
+[33mb0b8b57[m 未ログインユーザーに一覧リンク
+[33md111f71[m 検索機能作成２
+[33mc4d3f06[m とりあえず検索機能作成
+[33m82977df[m 検索ボックスのみ
+[33me113de6[m 水平線記載
+[33m939b1d4[m 個別設定１
+[33m88079ca[m ユーザーごとにログインできる設定に
+[33m7ba0be6[m 閲覧でなく編集、作成、削除操作で未ログイン時はじかれる設定
+[33m6139cf8[m 無題の保存
+[33me7ae66c[m バリデート緩く
+[33m3d1ede1[m Blogに変更
+[33m4d93fe9[m first commit
+[33me37b95f[m 今まで通り料理提案PGとして開発続行
+[33m5ee5c69[m 前回の「公開用開発始めるここからブログに変更する」を撤回、このまま料理提案PGとする
+[33m2643eb9[m 公開用開発はじめるこれここからブログに変更する
+[33maa8cd95[m コミットによるミス対処
+[33mc8b0a8f[m GitHubとの競合を解消
+[33mf0ed3f3[m test
+[33mc81323a[m 1フォルダ内整理（2重になってたので）
+[33me8b1ef4[m Merge branch 'main' of https://github.com/nnjrg248-debug/MenuSuggestion
+[33m54bac8f[m sendgridの審査通るかわからんのでsendgridなしで作る
+[33ma0b25d2[m 04161625
+[33m501fcf6[m Menu_Suggestion 作成
+[33m753f514[m リモート管理
+[33m986f0b0[m Add files via upload
+[33madc1d81[m Initial commit

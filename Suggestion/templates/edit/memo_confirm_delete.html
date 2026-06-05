@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<h1>Blogの削除</h1>
+    <p>「<strong>{{memo.title}}</strongs>」を本当に削除してもよろしいですか</p>
+
+        <form method="POST">
+            {% csrf_token   %}
+            <button type="submit"style="background-color:red;color:white;">
+                はい削除します</from><button>
+            
+
+                <a href="{% url 'memo_list' %}">キャンセル></a>
+
+
+        </from>
+
+
+</body>
+
+
+</html>

@@ -1,0 +1,9 @@
+
+<!-- upload_test.html の例 -->
+<form method="POST" action="/handle_inbound_email/" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="email" name="from" placeholder="あなたのメールアドレス" required><br>
+    <textarea name="text" placeholder="材料や要望を入力"></textarea><br>
+    <input type="file" name="photo"><br>
+    <button type="submit">AIにレシピを聞く</button>
+</form>

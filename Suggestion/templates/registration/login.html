@@ -1,0 +1,21 @@
+
+
+
+<h2>ログイン</h2>
+<form method="post">
+    {% csrf_token %}
+    {{form.as_p}}
+    <button type ="submit">ログイン</button>
+</form>
+
+<hr>
+    <p><a href="{% url 'post_list'%}">トップページへ戻る</a></p>
+
+    <!--
+    <button type ="submit">ログイン</button>おすと
+    path('',PostListView.as_view(),name='post_list'),    
+    が呼ばれるのはactionでurlを指定してないのでURL＝空となるので
+    
+    
+    
+    -->

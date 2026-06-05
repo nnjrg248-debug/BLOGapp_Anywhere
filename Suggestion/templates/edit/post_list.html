@@ -1,0 +1,21 @@
+
+{% if user.is_authenticated %}
+    <!-- ログインしている時だけ表示 -->
+    <p>ようこそ、{{ user.username }}さん</p>
+    <form action="{% url 'account_logout' %}" method="post">
+        {% csrf_token %}
+
+        <a href="{% url 'memo_list' %}"style="font-weight: bold; font-size: 1.2em;">👉Blog一覧</a>
+         <br> <br> <br>
+
+        <button type="submit">ログアウト</button>
+    </form>
+{% else %}
+    <!-- ログインしていない時だけ表示 -->
+    <a href="{% url 'account_login' %}">ログイン画面</a> <!--ログアウトボタン押すと未ログイン状態になる-->
+    <BR><BR>
+
+
+     <a href="{% url 'memo_list' %}"style="font-weight: bold; font-size: 1.2em;">👉Blog一覧</a>
+{% endif %}
+

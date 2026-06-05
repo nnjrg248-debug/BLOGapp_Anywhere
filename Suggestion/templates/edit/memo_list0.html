@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head><title>メモ帳アプリ</title></head>
+<body>
+    <h1>メモ一覧</h1>
+    <ul>
+        {% for memo in memos%}
+            <li>
+                <strong>{{memo.title}}</strong> - {{memo.create_at|date:"Y/m/d H:i" }}
+                <a href="{% url 'memo_edit' pk=memo.pk %}">[編集]</a>
+                
+                <a href="{% url 'memo_delete' pk=memo.pk %}"style="color:red">[削除]</a>
+
+                <p>{{memo.content}}</p>
+
+
+            </li>
+        {%empty%}
+            <li>まだメモがありません</li>
+        {%endfor%}
+    </ul>
+    <a href="{% url 'memo_create' %}">＋ 新しいメモを書く</a> 
+</body>
+</html>
+

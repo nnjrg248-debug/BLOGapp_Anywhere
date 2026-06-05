@@ -1,0 +1,23 @@
+{% extends "edit/base.html" %}
+
+{% block head_title %}退会手続き{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-4 text-center text-red-600">退会手続き</h2>
+<p class="text-gray-600 mb-6 text-sm text-center">
+    アカウントを削除すると、登録されたメールアドレスやこれまでのデータはすべて消去されます。本当に退会しますか？
+</p>
+
+<!-- 確実にPOSTで送信するフォーム -->
+<form method="POST" action="{% url 'account_delete' %}" class="space-y-4">
+    {% csrf_token %}
+    
+    <button type="submit" class="w-full bg-red-600 text-white p-2 rounded hover:bg-red-700 font-bold">
+        完全に退会する
+    </button>
+    
+    <a href="/" class="block text-center w-full bg-gray-200 text-gray-700 p-2 rounded hover:bg-gray-300">
+        キャンセルして戻る
+    </a>
+</form>
+{% endblock %}
