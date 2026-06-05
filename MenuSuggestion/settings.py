@@ -164,10 +164,12 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 465
+EMAIL_PORT = 587
+# ⭕ TLSをTrueに戻し、SSLをFalseにします
 EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
 
 # 送信元のGmailアドレス
 EMAIL_HOST_USER = 'nnjrg842@gmail.com'
