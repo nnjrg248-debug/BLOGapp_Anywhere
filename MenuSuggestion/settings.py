@@ -163,7 +163,7 @@ load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND =  'django.core.mail.backends.console.EmailBackend'#'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'#'://gmail.com'
 #EMAIL_HOST = '://gmail.com'sendgridのアカウント審査とおてないが　EMAIL_HOST = '://gmail.com'はエラーになる
 EMAIL_PORT = 587
