@@ -163,39 +163,21 @@ load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-EMAIL_BACKEND =  'django.core.mail.backends.console.EmailBackend'#'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
-EMAIL_HOST = 'smtp.gmail.com'#'://gmail.com'
-#EMAIL_HOST = '://gmail.com'sendgridのアカウント審査とおてないが　EMAIL_HOST = '://gmail.com'はエラーになる
+EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-# 送信に使用するGmailアカウント
-#EMAIL_HOST_USER ='nnjrg248@gmail.com'#'nnjrg248@yahoo.co.jp'# 'nnjrg248@gmail.com'
-# 送信に使用するGmailアカウント
-#EMAIL_HOST_USER ='nnjrg842@gmail.com'#'nnjrg248@yahoo.co.jp'# 'nnjrg248@gmail.com'
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "nnjrg842@gmail.com")
-# Googleアカウントで発行した「アプリパスワード」を入力します（通常のパスワードではありません）
-#EMAIL_HOST_PASSWORD = 'nrfl lhcu dhyy nnke'
-#EMAIL_HOST_PASSWORD = 'bflh dviz ubkw zhju'
-# 新：Renderの金庫（環境変数）から安全に読み込む設定にします
+# 送信元のGmailアドレス
+EMAIL_HOST_USER = 'nnjrg842@gmail.com'
+
+# Renderの環境変数（Environment）から新しい16桁のパスワードを読み込む
+import os
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-# デフォルトの送信元アドレス（任意）
-#DEFAULT_FROM_EMAIL = 'fromcl@1q1q.xyz'
 
+# オールアース（allauth）用の通知設定
 ACCOUNT_MESSAGES = False
-#ACCOUNT_SITE_NAME = "マイCSVクリーナー"
-ACCOUNT_SITE_NAME = "nnjrg842ブログ"
-ACCOUNT_EMAIL_SUBJECT_PREFIX = "[nnjrg842ブログ] "
-#DEFAULT_FROM_EMAIL = "nnjrg842ブログ運営 <nnjrg842@gmail.com>"
-
+ACCOUNT_SITE_NAME = "nnjrg842ブログサポート"
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[nnjrg842ブログサポート] "
 DEFAULT_FROM_EMAIL = f"{ACCOUNT_SITE_NAME} <{EMAIL_HOST_USER}>"
-MESSAGE_LEVEL = messages.WARNING
-
-
-
-# 公開時の設定
-DEBUG = False
-ALLOWED_HOSTS = ['*']
