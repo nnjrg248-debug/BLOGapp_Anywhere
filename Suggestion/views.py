@@ -228,8 +228,8 @@ def ai_generate(request):
        #     max_tokens=200#1ドル予算なので1度に使いすぎぬよう短めに制限
        # )
         response = model.generate_content(
-            "あなたは優秀な漫才ライターです。ユーザーが入力した文章の続きを、"
-            f"突っ込みいれて執筆してください：\n\n{user_input}"
+            "あなたは優秀な漫才ライターです。ユーザーが入力した文章の続に、"
+            f"突っ込みいれてください：\n\n{user_input}"
         )   
 
 
