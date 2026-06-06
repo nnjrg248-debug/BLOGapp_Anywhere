@@ -40,12 +40,29 @@
 <style>
     /* 簡易的に入力欄をBootstrap風にするCSS */
     input, textarea { width: 100%; border: 1px solid #ced4da; border-radius: 0.375rem; padding: 0.375rem 0.75rem; }
+
+
+    .ai-used {
+        border-color: #6c757d !important;
+        color: #6c757d !important;
+        background-color: #e9ecef !important;
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
 </style>
 {# JavaScriptを追加 #}
 <script>
+let aiUsed = false;
 document.getElementById('ai-btn').addEventListener('click', function() {
     // 1. Djangoの自動生成IDを取得 (nameがtextならid_textになります)
     // お使いのモデルのフィールド名が 'text' 以外ならここを書き換えてください
+
+    if (aiUsed) {
+        alert('もうしわけありません、使用できるの１回までです。')
+        return;  // ← すでに使っていたら何もしない
+    }
+    aiUsed = true;  // ← ここで「1回使った」と記録
+
     const textArea = document.getElementById('id_text') || document.getElementById('id_content');
     
     if (!textArea) {
@@ -60,6 +77,7 @@ document.getElementById('ai-btn').addEventListener('click', function() {
     btn.innerText = "AIが執筆中...";
     btn.disabled = true;
 
+    btn.classList.add("ai-used");  
     // Viewへリクエスト送信
     fetch("{% url 'ai_generate' %}?text=" + encodeURIComponent(currentText))
         .then(response => response.json())
