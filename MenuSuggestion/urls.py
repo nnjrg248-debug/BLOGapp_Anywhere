@@ -3,6 +3,7 @@ from django.urls import path,include
 from allauth.account import views as allauth_views  
 
 urlpatterns=[
+    
     path('admin/',admin.site.urls),
     #path('accounts/', include('django.contrib.auth.urls')), 
     #path('',include('edit.urls')),
