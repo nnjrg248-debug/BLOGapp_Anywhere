@@ -164,7 +164,7 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 # ⭕ TLSをTrueに戻し、SSLをFalseにします
@@ -177,7 +177,9 @@ EMAIL_HOST_USER = 'nnjrg842@gmail.com'
 # Renderの環境変数（Environment）から新しい16桁のパスワードを読み込む
 import os
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-
+if not EMAIL_HOST_PASSWORD:
+ EMAIL_HOST_PASSWORD ='bnsv lqqm yypf kzsf'
+#EMAIL_HOST_PASSWORD ='bnsvlqqm yypfkzsf'
 # オールアース（allauth）用の通知設定
 ACCOUNT_MESSAGES = False
 ACCOUNT_SITE_NAME = "nnjrg842ブログサポート"
