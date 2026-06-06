@@ -213,17 +213,27 @@ def ai_generate(request):
         #ユーザが入力した「タイトル」、「冒頭の分を取得」
         user_input=request.GET.get('text','')
 
-        client = OpenAI(api_key=settings.OPENAI_API_KEY)
+       # 💡 以前の書き方でモデルを指定（gemini-1.5-flash も無料枠で使えます）
+        # もし最新の 2.5 にしたい場合はここを 'gemini-2.5-flash' に書き換えても動きます
+        model = genai.GenerativeModel('gemini-1.5-flash')
 
         #AIにリクエスト送る
-        response=client.chat.completions.create(
-            model="gpt-4o-mini", # 安くて速いモデル。gpt-5-nanoより安定
-            messages=[
-                {"role":"system","content":"あなたは優秀なライターです。続きを執筆してください。"},
-                {"role":"user","content":f"以下の文章の続きを書いてください{user_input}"},
-            ],
-            max_tokens=200#1ドル予算なので1度に使いすぎぬよう短めに制限
+       # response=client.chat.completions.create(
+       #     #model="gpt-4o-mini", # 安くて速いモデル。gpt-5-nanoより安定
+       #     model='gemini-2.5-flash',
+       #     messages=[
+       #         {"role":"system","content":"あなたは優秀なライターです。続きを執筆してください。"},
+       #         {"role":"user","content":f"以下の文章の続きを書いてください{user_input}"},
+       #     ],
+       #     max_tokens=200#1ドル予算なので1度に使いすぎぬよう短めに制限
+       # )
+        response = model.generate_content(
+            "あなたは優秀な漫才ライターです。ユーザーが入力した文章の続きを、"
+            f"突っ込みいれて執筆してください：\n\n{user_input}"
         )   
+
+
+
         ai_text=response.choices[0].message.content
         return JsonResponse({'result':ai_text})
     except Exception as e:
