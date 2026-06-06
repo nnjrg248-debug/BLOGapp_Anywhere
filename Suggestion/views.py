@@ -1,3 +1,7 @@
+import os  # 👈 追加：環境変数を扱うために必要
+from django.http import JsonResponse
+from dotenv import load_dotenv  # 👈 追加：.envファイルを読み込むライブラリ
+from google import genai  # 👈 Geminiの公式ライブラリ（環境に合わせて変更してください）
 
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Memo,Post
@@ -208,33 +212,27 @@ def delete_account(request):
         
     return render(request, 'account/delete_account.html')
 
+
 def ai_generate(request):
     try:
         #ユーザが入力した「タイトル」、「冒頭の分を取得」
+        api_key_env = os.getenv("GEMINI_API_KEY")
+        client = genai.Client(api_key=api_key_env)
         user_input=request.GET.get('text','')
 
-       # 💡 以前の書き方でモデルを指定（gemini-1.5-flash も無料枠で使えます）
-        # もし最新の 2.5 にしたい場合はここを 'gemini-2.5-flash' に書き換えても動きます
-        model = genai.GenerativeModel('gemini-1.5-flash')
 
-        #AIにリクエスト送る
-       # response=client.chat.completions.create(
-       #     #model="gpt-4o-mini", # 安くて速いモデル。gpt-5-nanoより安定
-       #     model='gemini-2.5-flash',
-       #     messages=[
-       #         {"role":"system","content":"あなたは優秀なライターです。続きを執筆してください。"},
-       #         {"role":"user","content":f"以下の文章の続きを書いてください{user_input}"},
-       #     ],
-       #     max_tokens=200#1ドル予算なので1度に使いすぎぬよう短めに制限
-       # )
-        response = model.generate_content(
-            "あなたは優秀な漫才ライターです。ユーザーが入力した文章の続に、"
-            f"突っ込みいれてください：\n\n{user_input}"
-        )   
+        # 2. 最新のモデル「gemini-2.5-flash」を呼び出す
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=(
+                "あなたは優秀な漫才ライターです。ユーザーが入力した文章の続に、"
+                f"突っ込みいれてください：\n\n{user_input}"
+            )
+        )
 
 
-
-        ai_text=response.choices[0].message.content
+        #ai_text=response.choices[0].message.content
+        ai_text = response.text
         return JsonResponse({'result':ai_text})
     except Exception as e:
             # ターミナルに具体的なエラー内容を表示させる
@@ -295,12 +293,12 @@ def handle_inbound_email0(request):
     return HttpResponse(status=405)
 
 
-import google.generativeai as genai
+#import google.generativeai as genai
 import os
-
+from google import genai
 # Geminiの設定（本来はsettings.pyや環境変数に書くのが安全です）
-genai.configure(api_key="AIzaSyDiISuhHbd9nFvW153SfGatSOtob8j24zQ")
-model = genai.GenerativeModel('gemini-1.5-flash') # 高速・画像解析可能モデル
+#genai.configure(api_key="AIzaSyDiISuhHbd9nFvW153SfGatSOtob8j24zQ")
+#model = genai.GenerativeModel('gemini-2.5-flash') # 高速・画像解析可能モデル
 
 @csrf_exempt
 def handle_inbound_email(request):
