@@ -79,7 +79,7 @@
             {# いいね機能ボタン #}
             <div class="d-flex align-items-center gap-3 mb-3">
                 <button type="button" id="like-btn" class="btn btn-light" data-post-id="{{ memo.id }}">
-                    {% if user in memo.likes.all %}❤️ 取消{% else %}🤍 いいね{% endif %}
+                    {% if liked_by_session %}❤️ 取消{% else %}🤍 いいね{% endif %}
                 </button>
                 <span><strong id="like-count">{{ memo.total_likes_count }}</strong> 人がいいねしています</span>
             </div>

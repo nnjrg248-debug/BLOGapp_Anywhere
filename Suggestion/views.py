@@ -170,47 +170,54 @@ def memo_create(request):
             form=MemoForm() # 空のフォームを用意
     return render(request,'edit/memo_form.html',{'form':form})
 #@login_required # これ追加で未ログイン時ここに飛ばされない
+
 def memo_edit(request, pk):
-    # pk(ID)に一致するメモを取得、なければ404エラーを出す
     memo = get_object_or_404(Memo, pk=pk)
-    
+
+    # 💡 追加：このブラウザで「いいね済み」かどうかを取得
+    session_like_key = f'user_liked_{pk}'
+    liked_by_session = request.session.get(session_like_key, False)
+
     # ログインしていない、または投稿者本人ではない場合
     if not request.user.is_authenticated or memo.author != request.user:
-        
-        # 💡 【修正：閲覧数のカウント（F5連打防止）】
-        # 非ログインユーザーのときだけ、かつ、まだこのページを今回のブラウザセッションで見ていない場合
+
+        # 閲覧数カウント（非ログイン時のみ）
         if not request.user.is_authenticated:
-            session_key = f'viewed_memo_{pk}'
-            if not request.session.get(session_key, False):
+            session_view_key = f'viewed_memo_{pk}'
+            if not request.session.get(session_view_key, False):
                 memo.views_count = (memo.views_count or 0) + 1
                 memo.save()
-                request.session[session_key] = True # 「もう見た」という目印をブラウザに保存
-
+                request.session[session_view_key] = True
 
         form = MemoForm(instance=memo)
-        
-        # 【追加】フォーム内のすべてのテキストボックスを読み取り専用（readonly）にする
+
+        # 読み取り専用
         for field in form.fields.values():
             field.widget.attrs['readonly'] = True
-            # もしセレクトボックスやチェックボックスもある場合は、下の一行に変えてください
-            # field.widget.attrs['disabled'] = True
 
-        return render(request, 'edit/memo_form.html', {'form': form, 'memo': memo})
-    
-    if request.method=="POST":
-        #既存のデータ(instance=memo)をベースに入力内容(request.POST)を反映
-        form=MemoForm(request.POST,instance=memo)
-    # (定義でなく使用時の)MemoFormのカッコ内に引数2つだが材料の投入ということ  
-    #MemoFormクラスの __init__(self, *args, **kwargs): で使われる引数になる
+        # 💡 liked_by_session をテンプレートに渡す
+        return render(request, 'edit/memo_form.html', {
+            'form': form,
+            'memo': memo,
+            'liked_by_session': liked_by_session,
+        })
+
+    # 投稿者本人の編集処理
+    if request.method == "POST":
+        form = MemoForm(request.POST, instance=memo)
         if form.is_valid():
-             form.save()
-             return redirect('memo_list')
+            form.save()
+            return redirect('memo_list')
     else:
-        #編集画面を開いたときに、既存の内容をフォームに表示させる
-        form=MemoForm(instance=memo)
-    #return render(request,'edit/memo_form.html',{'form':form})
-# 💡 【重要】ここでも HTML（テンプレート）に 'memo' を一緒に渡すよう修正
-    return render(request, 'edit/memo_form.html', {'form': form, 'memo': memo})
+        form = MemoForm(instance=memo)
+
+    return render(request, 'edit/memo_form.html', {
+        'form': form,
+        'memo': memo,
+        'liked_by_session': liked_by_session,  # ← ここにも渡す
+    })
+
+
 
 @login_required # これ追加で未ログイン時ここに飛ばされない
 def memo_delete(request,pk):
@@ -268,54 +275,45 @@ def ai_generate(request):
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from .models import Memo
-
 def like_post(request, post_id):
     if request.method == 'POST':
         memo = get_object_or_404(Memo, id=post_id)
-        
-        # 自分の記事にはいいねできないガード
+
+        # 自分の記事にはいいね不可
         if request.user == memo.author:
             return JsonResponse({'error': '自分の記事にはいいねできません'})
 
-        # -------------------------------------------------------------
-        # 1. ログインしているユーザーの場合
-        # -------------------------------------------------------------
-        if request.user.is_authenticated:
-            if request.user in memo.likes.all():
+        session_key = f'user_liked_{post_id}'
+        already_liked = request.session.get(session_key, False)
+
+        # いいね取り消し
+        if already_liked:
+            request.session[session_key] = False
+            liked = False
+
+            memo.total_likes_count = max(0, memo.total_likes_count - 1)
+
+            if request.user.is_authenticated:
                 memo.likes.remove(request.user)
-                liked = False
-            else:
-                memo.likes.add(request.user)
-                liked = True
-            
-            # ログインユーザーの最新のいいね数を取得
-            total_likes = memo.likes.count()
-        
-        # -------------------------------------------------------------
-        # 2. ログインしていないユーザーの場合（セッションで安全に管理）
-        # -------------------------------------------------------------
+
+        # 新規いいね
         else:
-            session_key = f'anonymous_liked_{post_id}'
-            
-            # 💡 クラッシュ防止：現在のログインユーザーによる「いいね名簿の数」をベースにする
-            base_likes = memo.likes.count()
+            request.session[session_key] = True
+            liked = True
 
-            if request.session.get(session_key, False):
-                # 既にいいね済みなら取り消す
-                request.session[session_key] = False
-                liked = False
-                total_likes = base_likes  # 取り消したので元の名簿の数に戻す
-            else:
-                # 未いいねなら追加する（画面表示用に+1する）
-                request.session[session_key] = True
-                liked = True
-                total_likes = base_likes + 1
+            memo.total_likes_count += 1
 
-        # 💡 エラーなく正常なJSONデータをJavaScriptに送り返す
+            if request.user.is_authenticated:
+                memo.likes.add(request.user)
+
+        memo.save()
+
         return JsonResponse({
             'liked': liked,
-            'total_likes': total_likes
+            'total_likes': memo.total_likes_count
         })
+
+
 
 def test_email_view(request):
     send_mail(
