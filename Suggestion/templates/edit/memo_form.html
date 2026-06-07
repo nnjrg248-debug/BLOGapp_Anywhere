@@ -23,31 +23,76 @@
                         {{ field }}
                     </div>
                     {% if user.is_authenticated %}
-                    {#--ここからAIボタン追加 フィールドが本文（textやcontent）の場合だけ表示--#}
-                    {% if field.name == 'text' or field.name == 'content' %}
-                        <button type="button" id="ai-btn" class="btn btn-outline-primary btn-sm mt-2">
-                            ✨ AIに続きを書いてもらう
-                        </button>
-                    {% endif %}
+                        {#--ここからAIボタン追加 フィールドが本文（textやcontent）の場合だけ表示--#}
+                        {% if field.name == 'text' or field.name == 'content' %}
+                            <button type="button" id="ai-btn" class="btn btn-outline-primary btn-sm mt-2">
+                                ✨ AIに続きを書いてもらう
+                            </button>
+                        {% endif %}
+                 
                     {% endif %}
                     {#--ここまで--#}               
                 
                 </div>
             {% endfor %}
-             {% if user.is_authenticated %}
-            <button type="submit" class="btn btn-success">保存する</button>
-            <a href="{% url 'memo_list' %}" class="btn btn-secondary">キャンセル</a>
+            {# ========================================== #}
+            {# ボタンエリアの切り替え                      #}
+            {# ========================================== #}
+            {% if user.is_authenticated %}
+                {# ログイン時：保存して送信できる #}
+                <button type="submit" class="btn btn-success">保存する</button>
+                <a href="{% url 'memo_list' %}" class="btn btn-secondary">キャンセル</a>
             {% else %}
-            <a href="{% url 'memo_list' %}" class="btn btn-secondary">キャンセル</a>
+                {# 非ログイン時：送信ボタンは置かない #}
+                <a href="{% url 'memo_list' %}" class="btn btn-secondary">戻る</a>
             {% endif %}
-        </form>
+        </form> {# 常にここでフォームを閉じます #}
+
+        {# ========================================== #}
+        {# 非ログイン時のみ表示する統計情報・SNSエリア  #}
+        {# ========================================== #}
+        {% if not user.is_authenticated %}
+            <hr>
+            
+            <p class="text-muted">👁️ 閲覧数: {{ memo.views_count|default:0 }} 回</p>
+
+            {# いいね機能ボタン #}
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <button type="button" id="like-btn" class="btn btn-light" data-post-id="{{ memo.id }}">
+                    {% if user in memo.likes.all %}❤️ 取消{% else %}🤍 いいね{% endif %}
+                </button>
+                <span><strong id="like-count">{{ memo.total_likes|default:0 }}</strong> 人がいいねしています</span>
+            </div>
+            
+            {# SNSシェアボタン：間隔を空けて横並び #}
+            <div style="display: flex;flex-direction: column;  gap: 7px;margin-top: 10px;" class="mb-4">
+                            <!-- X (旧Twitter) シェアボタン -->
+                <a href="https://x.com{{ request.build_absolute_uri|urlencode }}&text={{ post.title|urlencode }}" target="_blank" class="btn btn-dark w-100">
+                    Xでシェア
+                </a>
+
+                <!-- LINE 送信ボタン -->
+                <a href="https://line.me{{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-success w-100">
+                    LINEで送る
+                </a>
+            </div>
+        {% endif %}
+
     </div>
 </div>
+
 <style>
-    /* 簡易的に入力欄をBootstrap風にするCSS */
-    input, textarea { width: 100%; border: 1px solid #ced4da; border-radius: 0.375rem; padding: 0.375rem 0.75rem; }
-
-
+    input, textarea { 
+        width: 100%; 
+        border: 1px solid #ced4da; 
+        border-radius: 0.375rem; 
+        padding: 0.375rem 0.75rem; 
+    }
+    /* 非ログイン時（編集不可）の入力欄の見た目を少しグレーにする
+    fieldset[disabled] input, fieldset[disabled] textarea {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    } */
     .ai-used {
         border-color: #6c757d !important;
         color: #6c757d !important;
@@ -56,88 +101,104 @@
         cursor: not-allowed;
     }
 </style>
+
 {# JavaScriptを追加 #}
 <script>
 let aiUsed = false;
-document.getElementById('ai-btn').addEventListener('click', function() {
-    // 1. Djangoの自動生成IDを取得 (nameがtextならid_textになります)
-    // お使いのモデルのフィールド名が 'text' 以外ならここを書き換えてください
+// ★変更点：非ログイン時にエラーでクラッシュしないよう、ボタンが存在するときだけ動かすガードを入れます
+const aiBtn = document.getElementById('ai-btn');
+if (aiBtn) {
+    aiBtn.addEventListener('click', function() {
+        if (aiUsed) {
+            alert('もうしわけありません、使用できるの１回までです。')
+            return;
+        }
+        aiUsed = true;
 
-    if (aiUsed) {
-        alert('もうしわけありません、使用できるの１回までです。')
-        return;  // ← すでに使っていたら何もしない
-    }
-    aiUsed = true;  // ← ここで「1回使った」と記録
+        const textArea = document.getElementById('id_text') || document.getElementById('id_content');
+        
+        if (!textArea) {
+            alert("入力欄が見つかりませんでした。");
+            return;
+        }
 
-    const textArea = document.getElementById('id_text') || document.getElementById('id_content');
-    
-    if (!textArea) {
-        alert("入力欄が見つかりませんでした。");
-        return;
-    }
+        const currentText = textArea.value;
+        const btn = this;
 
-    const currentText = textArea.value;
-    const btn = this;
+        btn.innerText = "AIが執筆中...";
+        btn.disabled = true;
+        btn.classList.add("ai-used");  
 
-    // ボタンを無効化
-    btn.innerText = "AIが執筆中...";
-    btn.disabled = true;
-
-    btn.classList.add("ai-used");  
-    // Viewへリクエスト送信
-    fetch("{% url 'ai_generate' %}?text=" + encodeURIComponent(currentText))
-        .then(response => response.json())
-        .then(data => {
-            if (data.result) {
-                // AIの回答を末尾に追加
-                textArea.value += (textArea.value ? "\n\n" : "") + data.result;
-            } else {
-                alert("AIから返答がありませんでした。APIの設定や残高を確認してください。");
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert("エラーが発生しました。URL設定などを確認してください。");
-        })
-        .finally(() => {
-            btn.innerText = "✨ AIに続きを書いてもらう";
-            btn.disabled = false;
-        });
-});
-
-
+        fetch("{% url 'ai_generate' %}?text=" + encodeURIComponent(currentText))
+            .then(response => response.json())
+            .then(data => {
+                if (data.result) {
+                    textArea.value += (textArea.value ? "\n\n" : "") + data.result;
+                } else {
+                    alert("AIから返答がありませんでした。APIの設定や残高を確認してください。");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("エラーが発生しました。URL設定などを確認してください。");
+            })
+            .finally(() => {
+                btn.innerText = "✨ AIに続きを書いてもらう";
+                btn.disabled = false;
+            });
+    });
+}
 </script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 独自につけた id="error-message" の要素を取得します
     const errorMessage = document.getElementById('error-message');
-    
-    // エラーメッセージが存在し、かつ中身が空っぽではない場合だけ動かす
     if (errorMessage && errorMessage.innerText.trim() !== "") {
-        
-        // 画面のどこかをクリックした瞬間に消す
         document.addEventListener('click', function() {
             errorMessage.style.display = 'none';
         }, { once: true });
 
-        // キーボードで何か入力された瞬間に消す
         document.addEventListener('keydown', function() {
             errorMessage.style.display = 'none';
         }, { once: true });
     }
 });
 </script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Djangoから送られたエラーテキストをJavaScriptに渡す
-    // {{ form.title.errors.0|default:'' }} の内容が存在するかチェック
     const errorText = "{{ form.title.errors.0|escapejs }}";
-    
     if (errorText.trim() !== "") {
-        // メッセージボックスを表示
         alert(errorText);
     }
 });
+</script>
+
+<script>
+// ★変更点：非ログイン時（いいねボタンがあるとき）だけイベントを設定するガードを入れます
+const likeBtn = document.getElementById('like-btn');
+if (likeBtn) {
+    likeBtn.addEventListener('click', function() {
+        const postId = this.getAttribute('data-post-id');
+        
+        fetch(`/post/${postId}/like/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                this.textContent = data.liked ? '❤️ 取消' : '🤍 いいね';
+                document.getElementById('like-count').textContent = data.total_likes;
+            }
+        });
+    });
+}
 </script>
 
 {% endblock %}

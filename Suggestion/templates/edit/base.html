@@ -8,6 +8,20 @@
     <!-- Bootstrap CSSの読み込み -->
 <!-- 速度遅い場合「htmlファイルのhttps://で始まる行が原因でないか」とのことで以下をコメントにしたらはやくなった　-->
     <!-- <link href="https://jsdelivr.net" rel="stylesheet"> -->
+      <!-- 検索エンジン用の説明文 -->
+    <meta name="description" content="{{ post.content|truncatechars:100 }}">
+
+    <!-- OGP設定（SNS用） -->
+    <meta property="og:title" content="{{ post.title }} | 私のブログ">
+    <meta property="og:description" content="{{ post.content|truncatechars:100 }}">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <!-- 記事に画像がある場合はそのURL、ない場合はデフォルト画像 -->
+    <meta property="og:image" content="{% if post.image %}{{ post.image.url }}{% else %}https://example.com{% endif %}">
+    
+    <!-- X（旧Twitter）用のカード設定 -->
+    <meta name="twitter:card" content="summary_large_image">
+    
 </head>
 <body class="bg-light">
 
