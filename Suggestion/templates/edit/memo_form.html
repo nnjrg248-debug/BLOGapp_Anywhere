@@ -4,7 +4,27 @@
 <div class="card shadow">
     <div class="card-body">
         
-        <h2>{% if form.instance.pk %}Blogを編集{% else %}新規作成{% endif %}</h2>
+        {% if form.instance.pk %}
+                {%  if user.is_authenticated and request.user == memo.author  %}
+                    <h2>Blogを編集</h2>
+                {% else %}
+                    <!-- 💡 横一列に並べるための外枠（親要素）を追加 -->
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <h2 class="mb-0">記事を読む</h2>
+                        
+                        <span class="text-secondary" style="font-size: 0.75rem;">
+                            👤 {{ memo.author.username }}
+                        </span>
+                        
+                        <span class="badge bg-secondary" style="font-size: 0.7rem;">
+                            {{ memo.created_at|date:"n/j" }}
+                        </span>
+                    </div>
+                {% endif %}
+            {% else %}
+                <h2>新規作成</h2>
+            {% endif %}
+        
 <!--↑form.instance.pkについて
     一番下に記載
  -->
@@ -22,7 +42,7 @@
                     <div class="form-control-wrapper">
                         {{ field }}
                     </div>
-                    {% if user.is_authenticated %}
+                    {%  if user.is_authenticated and request.user == memo.author  %}
                         {#--ここからAIボタン追加 フィールドが本文（textやcontent）の場合だけ表示--#}
                         {% if field.name == 'text' or field.name == 'content' %}
                             <button type="button" id="ai-btn" class="btn btn-outline-primary btn-sm mt-2">
@@ -38,7 +58,7 @@
             {# ========================================== #}
             {# ボタンエリアの切り替え                      #}
             {# ========================================== #}
-            {% if user.is_authenticated %}
+            {%   if user.is_authenticated and request.user == memo.author   %}
                 {# ログイン時：保存して送信できる #}
                 <button type="submit" class="btn btn-success">保存する</button>
                 <a href="{% url 'memo_list' %}" class="btn btn-secondary">キャンセル</a>
@@ -49,9 +69,9 @@
         </form> {# 常にここでフォームを閉じます #}
 
         {# ========================================== #}
-        {# 非ログイン時のみ表示する統計情報・SNSエリア  #}
+        {# 本人以外時のみ表示する統計情報・SNSエリア  #}
         {# ========================================== #}
-        {% if not user.is_authenticated %}
+        {% if request.user != memo.author %}
             <hr>
             
             <p class="text-muted">👁️ 閲覧数: {{ memo.views_count|default:0 }} 回</p>

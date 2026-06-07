@@ -56,11 +56,7 @@
             <a href="{% url 'post_list'%}">ログアウト画面へ</a>
         </div>
         -->
-        {% if user.is_authenticated and request.resolver_match.url_name != 'account_delete' %}
-        <a href="{% url 'account_delete' %}" class="text-red-500 hover:underline">
-            退会手続きはこちら
-        </a>
-        {% endif %}
+        
     </nav>    
 </body>
 </html>

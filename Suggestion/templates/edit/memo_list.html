@@ -63,11 +63,11 @@
               
                 <p class="card-text text-secondary">{{ memo.content|truncatechars:50 }}</p>
                 <div class="d-flex justify-content-end">
-                    {% if user.is_authenticated %}
-                    <a href="{% url 'memo_edit' pk=memo.pk %}" class="btn btn-sm btn-outline-secondary me-2">編集</a>
-                    <a href="{% url 'memo_delete' pk=memo.pk %}" class="btn btn-sm btn-outline-danger">削除</a>
+                    {% if user.is_authenticated and request.user == memo.author %}
+                        <a href="{% url 'memo_edit' pk=memo.pk %}" class="btn btn-sm btn-outline-secondary me-2">編集</a>
+                        <a href="{% url 'memo_delete' pk=memo.pk %}" class="btn btn-sm btn-outline-danger">削除</a>
                     {% else %}
-                    <a href="{% url 'memo_edit' pk=memo.pk %}" class="btn btn-sm btn-outline-secondary me-2">記事をよむ</a>
+                       <a href="{% url 'memo_edit' pk=memo.pk %}" class="btn btn-sm btn-outline-secondary me-2">記事をよむ</a>
                     {% endif %}
                 </div>
             </div>
@@ -89,7 +89,13 @@
         </div>
     </div>
     {% endfor %}
+    
 </div>
+{% if user.is_authenticated and request.resolver_match.url_name != 'account_delete' %}
+    <a href="{% url 'account_delete' %}" class="text-red-500 hover:underline">
+        退会手続きはこちら
+    </a>
+{% endif %}
 <script>
     // 1. 画面上のフォームとチェックボックスを具体的に指定して取得する
     const form = document.getElementById('searchForm');

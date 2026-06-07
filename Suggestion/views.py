@@ -170,16 +170,22 @@ def memo_create(request):
             form=MemoForm() # 空のフォームを用意
     return render(request,'edit/memo_form.html',{'form':form})
 #@login_required # これ追加で未ログイン時ここに飛ばされない
-def memo_edit(request,pk):
-     #pk(ID)に一致するメモを取得、なければ404エラーを出す
-     #memo= get_object_or_404(Memo, pk=pk, author=request.user)
-    memo= get_object_or_404(Memo, pk=pk)
-         # ログインしていない、または投稿者本人ではない場合
+def memo_edit(request, pk):
+    # pk(ID)に一致するメモを取得、なければ404エラーを出す
+    memo = get_object_or_404(Memo, pk=pk)
+    
+    # ログインしていない、または投稿者本人ではない場合
     if not request.user.is_authenticated or memo.author != request.user:
-         # 💡 【閲覧数のカウント】非ログインユーザーのときだけ閲覧数を1増やす
+        
+        # 💡 【修正：閲覧数のカウント（F5連打防止）】
+        # 非ログインユーザーのときだけ、かつ、まだこのページを今回のブラウザセッションで見ていない場合
         if not request.user.is_authenticated:
-            memo.views_count += 1
-            memo.save()
+            session_key = f'viewed_memo_{pk}'
+            if not request.session.get(session_key, False):
+                memo.views_count = (memo.views_count or 0) + 1
+                memo.save()
+                request.session[session_key] = True # 「もう見た」という目印をブラウザに保存
+
 
         form = MemoForm(instance=memo)
         
@@ -189,7 +195,7 @@ def memo_edit(request,pk):
             # もしセレクトボックスやチェックボックスもある場合は、下の一行に変えてください
             # field.widget.attrs['disabled'] = True
 
-        return render(request, 'edit/memo_form.html', {'form': form})
+        return render(request, 'edit/memo_form.html', {'form': form, 'memo': memo})
     
     if request.method=="POST":
         #既存のデータ(instance=memo)をベースに入力内容(request.POST)を反映
@@ -258,23 +264,45 @@ def ai_generate(request):
             print(f"エラーが発生しました: {e}")
             return JsonResponse({'error': str(e)}, status=500)
     
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 
-def like_post(request, pk):
-    if request.method == "POST" and request.user.is_authenticated:
-        post = get_object_or_404(Memo, pk=pk)
+def like_post(request, post_id):
+    if request.method == 'POST':
+        memo = get_object_or_404(Memo, id=post_id)
         
-        if post.likes.filter(id=request.user.id).exists():
-            post.likes.remove(request.user) # すでにいいねしてたら解除
-            liked = False
+        if request.user == memo.author:
+            return JsonResponse({'error': '自分の記事にはいいねできません'})
+
+        # 1. ログインしている場合
+        if request.user.is_authenticated:
+            if request.user in memo.likes.all():
+                memo.likes.remove(request.user)
+                liked = False
+            else:
+                memo.likes.add(request.user)
+                liked = True
+        
+        # 2. ログインしていない場合（セッションで簡易管理）
         else:
-            post.likes.add(request.user)    # いいね追加
-            liked = True
-            
+            session_key = f'anonymous_liked_{post_id}'
+            if request.session.get(session_key, False):
+                # セッション上のいいねを取り消す
+                # ※非ログイン時のトータルカウント減少処理をここに挟む
+                request.session[session_key] = False
+                liked = False
+            else:
+                request.session[session_key] = True
+                liked = True
+
+        # 最新の合計数を計算して返す
+        # (非ログインのカウントも考慮したカウント用フィールドがモデルに必要になります)
+        total_likes = memo.likes.count() # 必要に応じて調整
+        
         return JsonResponse({
             'liked': liked,
-            'total_likes': post.total_likes()
+            'total_likes': total_likes
         })
-    return JsonResponse({'error': 'ログインが必要です'}, status=400)
 
 def test_email_view(request):
     send_mail(
