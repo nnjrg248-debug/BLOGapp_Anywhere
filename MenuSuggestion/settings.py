@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-u_i22yuz$zq#xkq5*n1$1-ftc5wm7#9-$9kz6elhu&7z)1tjt1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['nnjrg248.pythonanywhere.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'Suggestion',
 
      # サイト識別用のDjango標準機能（allauthに必須）
-    'django.contrib.sites', 
+    'django.contrib.sites',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -85,7 +85,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         #'DIRS': [],
-        'DIRS': [BASE_DIR / 'templates'],  # ← ここが [BASE_DIR / 'templates'] 
+        'DIRS': [BASE_DIR / 'templates'],  # ← ここが [BASE_DIR / 'templates']
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -185,4 +185,7 @@ ACCOUNT_MESSAGES = False
 ACCOUNT_SITE_NAME = "nnjrg842ブログサポート"
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[nnjrg842ブログサポート] "
 DEFAULT_FROM_EMAIL = f"{ACCOUNT_SITE_NAME} <{EMAIL_HOST_USER}>"
-
+import os
+import warnings
+# 古いgoogle-generativeaiの非推奨警告を本番環境のログに出さないようにする設定
+warnings.filterwarnings("ignore", category=FutureWarning, module="google.generativeai")
