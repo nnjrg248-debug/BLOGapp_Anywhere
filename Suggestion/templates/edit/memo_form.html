@@ -87,12 +87,14 @@
             {# SNSシェアボタン：間隔を空けて横並び #}
             <div style="display: flex;flex-direction: column;  gap: 7px;margin-top: 10px;" class="mb-4">
                             <!-- X (旧Twitter) シェアボタン -->
-                <a href="https://x.com{{ request.build_absolute_uri|urlencode }}&text={{ post.title|urlencode }}" target="_blank" class="btn btn-dark w-100">
+                <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri|urlencode }}&text={{ memo.title|urlencode }}"
+                    target="_blank" class="btn btn-dark w-100">
                     Xでシェア
                 </a>
 
                 <!-- LINE 送信ボタン -->
-                <a href="https://line.me{{ request.build_absolute_uri|urlencode }}" target="_blank" class="btn btn-success w-100">
+                <a href="https://line.me/R/share?text={{ memo.title|urlencode }}%0A{{ request.build_absolute_uri|urlencode }}"
+                target="_blank" class="btn btn-success w-100">
                     LINEで送る
                 </a>
             </div>
