@@ -169,13 +169,23 @@ def memo_create(request):
     else:
             form=MemoForm() # 空のフォームを用意
     return render(request,'edit/memo_form.html',{'form':form})
-@login_required # これ追加で未ログイン時ここに飛ばされない
+#@login_required # これ追加で未ログイン時ここに飛ばされない
 def memo_edit(request,pk):
      #pk(ID)に一致するメモを取得、なければ404エラーを出す
-     memo= get_object_or_404(Memo, pk=pk, author=request.user)
-#↑ﾃﾞｰﾀﾍﾞｰｽMemoを探しに行ってる（なかったらここでエラー(強制終了)を出し
-# あったらMemoのDBがはいる）
-     if request.method=="POST":
+     #memo= get_object_or_404(Memo, pk=pk, author=request.user)
+    memo= get_object_or_404(Memo, pk=pk)
+         # ログインしていない、または投稿者本人ではない場合
+    if not request.user.is_authenticated or memo.author != request.user:
+        form = MemoForm(instance=memo)
+        
+        # 【追加】フォーム内のすべてのテキストボックスを読み取り専用（readonly）にする
+        for field in form.fields.values():
+            field.widget.attrs['readonly'] = True
+            # もしセレクトボックスやチェックボックスもある場合は、下の一行に変えてください
+            # field.widget.attrs['disabled'] = True
+
+        return render(request, 'edit/memo_form.html', {'form': form, 'read_only': True})
+    if request.method=="POST":
         #既存のデータ(instance=memo)をベースに入力内容(request.POST)を反映
         form=MemoForm(request.POST,instance=memo)
     # (定義でなく使用時の)MemoFormのカッコ内に引数2つだが材料の投入ということ  
@@ -183,10 +193,10 @@ def memo_edit(request,pk):
         if form.is_valid():
              form.save()
              return redirect('memo_list')
-     else:
+    else:
         #編集画面を開いたときに、既存の内容をフォームに表示させる
         form=MemoForm(instance=memo)
-     return render(request,'edit/memo_form.html',{'form':form})
+    return render(request,'edit/memo_form.html',{'form':form})
 @login_required # これ追加で未ログイン時ここに飛ばされない
 def memo_delete(request,pk):
     memo=  get_object_or_404(Memo, pk=pk, author=request.user)

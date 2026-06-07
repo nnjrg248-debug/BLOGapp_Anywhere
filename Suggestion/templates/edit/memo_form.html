@@ -22,18 +22,24 @@
                     <div class="form-control-wrapper">
                         {{ field }}
                     </div>
+                    {% if user.is_authenticated %}
                     {#--ここからAIボタン追加 フィールドが本文（textやcontent）の場合だけ表示--#}
                     {% if field.name == 'text' or field.name == 'content' %}
                         <button type="button" id="ai-btn" class="btn btn-outline-primary btn-sm mt-2">
                             ✨ AIに続きを書いてもらう
                         </button>
                     {% endif %}
+                    {% endif %}
                     {#--ここまで--#}               
                 
                 </div>
             {% endfor %}
+             {% if user.is_authenticated %}
             <button type="submit" class="btn btn-success">保存する</button>
             <a href="{% url 'memo_list' %}" class="btn btn-secondary">キャンセル</a>
+            {% else %}
+            <a href="{% url 'memo_list' %}" class="btn btn-secondary">キャンセル</a>
+            {% endif %}
         </form>
     </div>
 </div>
