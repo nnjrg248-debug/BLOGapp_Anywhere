@@ -17,5 +17,17 @@
 
 
      <a href="{% url 'memo_list' %}"style="font-weight: bold; font-size: 1.2em;">👉Blog一覧</a>
+
+    {% if  request.resolver_match.url_name == 'post_list' %}
+    <a href="https://nnjrg248-debug.github.io/csv-cleaner/" 
+       style="position: fixed; bottom: 10px; left: 10px; font-size: 0.75rem; color: #a1a1aa; text-decoration: none; z-index: 9999;"
+       class="hover:underline">
+    CSVクレンジングツール
+    </a>
+    {% endif %}
+
+
+
 {% endif %}
+
 
