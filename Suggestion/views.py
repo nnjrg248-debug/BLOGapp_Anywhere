@@ -263,9 +263,11 @@ def ai_generate(request):
             # ターミナルに具体的なエラー内容を表示させる
             print(f"エラーが発生しました: {e}")
             return JsonResponse({'error': str(e)}, status=500)
-    
+
+
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from .models import Memo
 
 def like_post(request, post_id):
     if request.method == 'POST':
@@ -275,7 +277,9 @@ def like_post(request, post_id):
         if request.user == memo.author:
             return JsonResponse({'error': '自分の記事にはいいねできません'})
 
+        # -------------------------------------------------------------
         # 1. ログインしているユーザーの場合
+        # -------------------------------------------------------------
         if request.user.is_authenticated:
             if request.user in memo.likes.all():
                 memo.likes.remove(request.user)
@@ -283,31 +287,31 @@ def like_post(request, post_id):
             else:
                 memo.likes.add(request.user)
                 liked = True
-            # 総いいね数は ManyToMany の件数
+            
+            # ログインユーザーの最新のいいね数を取得
             total_likes = memo.likes.count()
         
-        # 2. ログインしていないユーザーの場合（セッションで簡易管理）
+        # -------------------------------------------------------------
+        # 2. ログインしていないユーザーの場合（セッションで安全に管理）
+        # -------------------------------------------------------------
         else:
             session_key = f'anonymous_liked_{post_id}'
-            # まだモデルにトータルいいね数の数値フィールド（total_likes等）がない場合は、
-            # 応急処置として既存の数（名簿の数）をベースにプラスマイナスします
-            current_likes = memo.likes.count() # 本来はモデルに専用フィールドを作るのが理想です
+            
+            # 💡 クラッシュ防止：現在のログインユーザーによる「いいね名簿の数」をベースにする
+            base_likes = memo.likes.count()
 
             if request.session.get(session_key, False):
                 # 既にいいね済みなら取り消す
                 request.session[session_key] = False
                 liked = False
-                total_likes = max(0, current_likes - 1)
+                total_likes = base_likes  # 取り消したので元の名簿の数に戻す
             else:
-                # 未いいねなら追加する
+                # 未いいねなら追加する（画面表示用に+1する）
                 request.session[session_key] = True
                 liked = True
-                total_likes = current_likes + 1
-            
-            # 💡 注意: 非ログイン時のカウントをデータベースに保存したい場合は、
-            # Memoモデルに `total_likes` という整数型(IntegerField)のフィールドを追加する必要があります。
-            # 一時的に画面表示だけ変えたい場合は、このまま total_likes を返せばJavaScript側で正しく数字が変わります。
+                total_likes = base_likes + 1
 
+        # 💡 エラーなく正常なJSONデータをJavaScriptに送り返す
         return JsonResponse({
             'liked': liked,
             'total_likes': total_likes

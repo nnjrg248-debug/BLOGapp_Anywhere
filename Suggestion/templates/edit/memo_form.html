@@ -81,7 +81,7 @@
                 <button type="button" id="like-btn" class="btn btn-light" data-post-id="{{ memo.id }}">
                     {% if user in memo.likes.all %}❤️ 取消{% else %}🤍 いいね{% endif %}
                 </button>
-                <span><strong id="like-count">{{ memo.total_likes|default:0 }}</strong> 人がいいねしています</span>
+                <span><strong id="like-count">{{ memo.total_likes_count }}</strong> 人がいいねしています</span>
             </div>
             
             {# SNSシェアボタン：間隔を空けて横並び #}
