@@ -9,17 +9,19 @@
                     <h2>Blogを編集</h2>
                 {% else %}
                     <!-- 💡 横一列に並べるための外枠（親要素）を追加 -->
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <h2 class="mb-0">記事を読む</h2>
-                        
-                        <span class="text-secondary" style="font-size: 0.75rem;">
+                    <div style=" height:10px; border: 0px solid blue;">&nbsp;</div>
+                    <div class="  margin: 1000px 20px; ">
+                        <span class="title-like-h2 d-inline-block">記事を読む</span>
+
+                        <span class="text-secondary " style="font-size: 0.75rem;font-weight: bold;">
                             👤 {{ memo.author.username }}
                         </span>
-                        
-                        <span class="badge bg-secondary" style="font-size: 0.7rem;">
+
+                        <span class="badge bg-secondary " style="font-size: 0.7rem;font-weight: bold;">
                             {{ memo.created_at|date:"n/j" }}
                         </span>
                     </div>
+                    <div style="height:10px; outline: 0px solid red;">&nbsp;</div>
                 {% endif %}
             {% else %}
                 <h2>新規作成</h2>
@@ -105,6 +107,13 @@
 </div>
 
 <style>
+    .title-like-h2 {
+        font-size: 1.5rem;   /* h2 と同等 */
+        font-weight: bold;
+        line-height: 1.2;
+    }
+
+
     input, textarea { 
         width: 100%; 
         border: 1px solid #ced4da; 
