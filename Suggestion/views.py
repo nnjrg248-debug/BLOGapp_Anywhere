@@ -218,7 +218,26 @@ def memo_edit(request, pk):
         form = MemoForm(request.POST, instance=memo)
         if form.is_valid():
             form.save()
-            return redirect('memo_list')
+
+            # 💡 【重要】現在のURL（POSTを送信してきたURL）から検索パラメータを取得する
+            query = request.GET.get("q", "")
+            search_all = request.GET.get("all_blogs", "")
+            
+            # 💡 一覧画面（memo_list）の基本URLを作る
+            redirect_url = reverse("memo_list")
+            
+            # 💡 検索状態があれば、URLにお尻にくっつける
+            params = []
+            if query:
+                params.append(f"q={query}")
+            if search_all:
+                params.append(f"all_blogs={search_all}")
+                
+            if params:
+                redirect_url += "?" + "&".join(params)
+            
+            # 💡 検索パラメータ付きのURLにリダイレクトする
+            return redirect(redirect_url)
     else:
         form = MemoForm(instance=memo)
 
