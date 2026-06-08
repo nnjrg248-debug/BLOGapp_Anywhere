@@ -147,7 +147,7 @@ USE_TZ = True
 
 
 STATIC_URL = 'static/'
-
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 LOGIN_URL = 'login'#未ログイン時飛ばされるところ
 LOGIN_REDIRECT_URL = 'post_list' # ログインが成功した後に自動で飛ばす先（Top画面）
 ACCOUNT_LOGOUT_REDIRECT_URL = 'post_list' # ログアウト後にリダイレクトするページ名
@@ -189,3 +189,5 @@ import os
 import warnings
 # 古いgoogle-generativeaiの非推奨警告を本番環境のログに出さないようにする設定
 warnings.filterwarnings("ignore", category=FutureWarning, module="google.generativeai")
+import os
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
