@@ -44,14 +44,15 @@
                     <div class="form-control-wrapper">
                         {{ field }}
                     </div>
-                    {%  if user.is_authenticated and request.user == memo.author  %}
-                        {#--ここからAIボタン追加 フィールドが本文（textやcontent）の場合だけ表示--#}
-                        {% if field.name == 'text' or field.name == 'content' %}
-                            <button type="button" id="ai-btn" class="btn btn-outline-primary btn-sm mt-2">
-                                ✨ AIに続きを書いてもらう
-                            </button>
+                    {% if user.is_authenticated %} 
+                        {%  if not memo or request.user == memo.author %}
+                            {#--ここからAIボタン追加 フィールドが本文（textやcontent）の場合だけ表示--#}
+                            {% if field.name == 'text' or field.name == 'content' %}
+                                <button type="button" id="ai-btn" class="btn btn-outline-primary btn-sm mt-2">
+                                    ✨ AIに続きを書いてもらう
+                                </button>
+                            {% endif %}
                         {% endif %}
-                 
                     {% endif %}
                     {#--ここまで--#}               
                 
@@ -59,17 +60,18 @@
             {% endfor %}
             {# ========================================== #}
             {# ボタンエリアの切り替え                      #}
-            {# ========================================== #}
-            {%   if user.is_authenticated and request.user == memo.author   %}
-                {# ログイン時：保存して送信できる #}
-                <button type="submit" class="btn btn-success">保存する</button>
-                <!--<a href="{% url 'memo_list' %}" class="btn btn-secondary">キャンセル</a>-->
-                <a href="{% url 'memo_list' %}?q={{ request.GET.q }}&all_blogs={{ request.GET.all_blogs }}" class="btn btn-secondary">キャンセル</a>
+            {# ========================================== #}           
+
+            {% if user.is_authenticated %} 
+                {% if not memo or request.user == memo.author %}
+                    {# ログイン時かつ編集権限あり：保存して送信できる #}
+                    <button type="submit" class="btn btn-success">保存する</button>
+                    <a href="{% url 'memo_list' %}?q={{ request.GET.q }}&all_blogs={{ request.GET.all_blogs }}" class="btn btn-secondary">キャンセル</a>        
+                {% endif %}
             {% else %}
-                {# 非ログイン時：送信ボタンは置かない #}
-                <!--<a href="{% url 'memo_list' %}" class="btn btn-secondary">戻る</a>-->
-                 <a href="{% url 'memo_list' %}?q={{ request.GET.q }}&all_blogs={{ request.GET.all_blogs }}" class="btn btn-secondary">戻る</a> 
-            {% endif %}        
+                {# 非ログイン時（または権限なし）：送信ボタンは置かない #}
+                <a href="{% url 'memo_list' %}?q={{ request.GET.q }}&all_blogs={{ request.GET.all_blogs }}" class="btn btn-secondary">戻る</a> 
+            {% endif %}      
         </form> {# 常にここでフォームを閉じます #}
         {# ========================================== #}
         {# 本人以外時のみ表示する統計情報・SNSエリア  #}
