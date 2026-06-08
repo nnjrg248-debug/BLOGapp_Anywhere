@@ -218,26 +218,7 @@ def memo_edit(request, pk):
         form = MemoForm(request.POST, instance=memo)
         if form.is_valid():
             form.save()
-
-            # 💡 【重要】現在のURL（POSTを送信してきたURL）から検索パラメータを取得する
-            query = request.GET.get("q", "")
-            search_all = request.GET.get("all_blogs", "")
-            
-            # 💡 一覧画面（memo_list）の基本URLを作る
-            redirect_url = reverse("memo_list")
-            
-            # 💡 検索状態があれば、URLにお尻にくっつける
-            params = []
-            if query:
-                params.append(f"q={query}")
-            if search_all:
-                params.append(f"all_blogs={search_all}")
-                
-            if params:
-                redirect_url += "?" + "&".join(params)
-            
-            # 💡 検索パラメータ付きのURLにリダイレクトする
-            return redirect(redirect_url)
+            return redirect('memo_list')
     else:
         form = MemoForm(instance=memo)
 
@@ -279,6 +260,10 @@ def ai_generate(request):
     try:
         #ユーザが入力した「タイトル」、「冒頭の分を取得」
         api_key_env = os.getenv("GEMINI_API_KEY")
+
+
+        #client = genai.Client(api_key=api_key_env)
+        #api_key_env = "AIzaSyDiISuhHbd9nFvW153SfGatSOtob8j24zQ"        
         client = genai.Client(api_key=api_key_env)
         user_input=request.GET.get('text','')
 
@@ -294,7 +279,13 @@ def ai_generate(request):
 
 
         #ai_text=response.choices[0].message.content
-        ai_text = response.text
+        #ai_text = response.text
+        if hasattr(response, 'text'):
+            ai_text = response.text
+        else:
+            # 万が一古いライブラリが動いている場合のセーフティ
+            ai_text = response.candidates[0].content.parts[0].text
+
         return JsonResponse({'result':ai_text})
     except Exception as e:
             # ターミナルに具体的なエラー内容を表示させる
