@@ -123,8 +123,19 @@ def memo_list(request):
 
     # 3. 最後に日付順に並び替える
     memos = sorted(memos, key=lambda x: x.created_at, reverse=True)
+    
+# 💡 【修正箇所】HTML側で現在の検索状態を維持するために context を追加・整理します
+    context = {
+        "memos": memos,
+        "query": query,         # 検索窓の文字を維持するため
+        "search_all": search_all, # チェックボックスの状態を維持するため
+    }
+    return render(request, "edit/memo_list.html", context)    
 
-    return render(request, "edit/memo_list.html", {"memos": memos})
+
+   # return render(request, "edit/memo_list.html", {"memos": memos})
+
+
 def memo_export(request):
     # 🔐 安全対策：ログインしていない人が直リンクでアクセスしてきたら拒否する
     if not request.user.is_authenticated:

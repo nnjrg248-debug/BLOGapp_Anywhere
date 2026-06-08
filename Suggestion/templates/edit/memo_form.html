@@ -61,13 +61,14 @@
             {%   if user.is_authenticated and request.user == memo.author   %}
                 {# ログイン時：保存して送信できる #}
                 <button type="submit" class="btn btn-success">保存する</button>
-                <a href="{% url 'memo_list' %}" class="btn btn-secondary">キャンセル</a>
+                <!--<a href="{% url 'memo_list' %}" class="btn btn-secondary">キャンセル</a>-->
+                <a href="{% url 'memo_list' %}?q={{ request.GET.q }}&all_blogs={{ request.GET.all_blogs }}" class="btn btn-secondary">キャンセル</a>
             {% else %}
                 {# 非ログイン時：送信ボタンは置かない #}
-                <a href="{% url 'memo_list' %}" class="btn btn-secondary">戻る</a>
-            {% endif %}
+                <!--<a href="{% url 'memo_list' %}" class="btn btn-secondary">戻る</a>-->
+                 <a href="{% url 'memo_list' %}?q={{ request.GET.q }}&all_blogs={{ request.GET.all_blogs }}" class="btn btn-secondary">戻る</a> 
+            {% endif %}        
         </form> {# 常にここでフォームを閉じます #}
-
         {# ========================================== #}
         {# 本人以外時のみ表示する統計情報・SNSエリア  #}
         {# ========================================== #}
