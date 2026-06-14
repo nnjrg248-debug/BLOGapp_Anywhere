@@ -33,7 +33,7 @@
         <!--<p id="error-message" style="color: red;">{{ form.title.errors.0 }}</p>-->
         <form method="POST">
             {% csrf_token %}
-            {% for field in form %}
+            {% for field in form %}<!--forms.ModelFormで'content': SummernoteWidget(),としてるのでfieldが豪華になる-->
                 <div class="mb-3">
                     <label class="form-label">{{ field.label }}</label>
                     <!--↑fieldについて

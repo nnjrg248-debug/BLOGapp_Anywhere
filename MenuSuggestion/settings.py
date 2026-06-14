@@ -131,6 +131,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+SUMMERNOTE_CONFIG = {
+    'iframe': False,
+    'summernote': {
+        'lineHeights': ['0.5', '1.0', '1.5'],
+        'disableResizeEditor': False,
+        'styleTags': ['p', 'br'],
+    },
+    'css': ('/static/summernote/custom.css',),
+}
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
