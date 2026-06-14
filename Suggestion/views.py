@@ -180,55 +180,47 @@ def memo_create(request):
     else:
             form=MemoForm() # 空のフォームを用意
     return render(request,'edit/memo_form.html',{'form':form})
-#@login_required # これ追加で未ログイン時ここに飛ばされない
 
+@login_required
 def memo_edit(request, pk):
     memo = get_object_or_404(Memo, pk=pk)
 
-    # 💡 追加：このブラウザで「いいね済み」かどうかを取得
-    session_like_key = f'user_liked_{pk}'
-    liked_by_session = request.session.get(session_like_key, False)
+    # 投稿者以外は編集不可
+    if memo.author != request.user:
+        return redirect('memo_detail', pk=pk)
 
-    # ログインしていない、または投稿者本人ではない場合
-    if not request.user.is_authenticated or memo.author != request.user:
-
-        # 閲覧数カウント（非ログイン時のみ）
-        if not request.user.is_authenticated:
-            session_view_key = f'viewed_memo_{pk}'
-            if not request.session.get(session_view_key, False):
-                memo.views_count = (memo.views_count or 0) + 1
-                memo.save()
-                request.session[session_view_key] = True
-
-        form = MemoForm(instance=memo)
-
-        # 読み取り専用
-        for field in form.fields.values():
-            field.widget.attrs['readonly'] = True
-
-        # 💡 liked_by_session をテンプレートに渡す
-        return render(request, 'edit/memo_form.html', {
-            'form': form,
-            'memo': memo,
-            'liked_by_session': liked_by_session,
-        })
-
-    # 投稿者本人の編集処理
     if request.method == "POST":
         form = MemoForm(request.POST, instance=memo)
         if form.is_valid():
             form.save()
-            return redirect('memo_list')
+            return redirect('memo_detail', pk=pk)
     else:
         form = MemoForm(instance=memo)
 
     return render(request, 'edit/memo_form.html', {
         'form': form,
         'memo': memo,
-        'liked_by_session': liked_by_session,  # ← ここにも渡す
     })
 
+def memo_detail(request, pk):
+    memo = get_object_or_404(Memo, pk=pk)#SQLエラーが出たときの対処
 
+    # いいね状態（セッション）
+    session_like_key = f'user_liked_{pk}'
+    liked_by_session = request.session.get(session_like_key, False)
+
+    # 閲覧数カウント（非ログイン時のみ）
+    if not request.user.is_authenticated:
+        session_view_key = f'viewed_memo_{pk}'
+        if not request.session.get(session_view_key, False):
+            memo.views_count = (memo.views_count or 0) + 1
+            memo.save()
+            request.session[session_view_key] = True
+
+    return render(request, 'edit/memo_detail.html', {
+        'memo': memo,
+        'liked_by_session': liked_by_session,
+    })
 
 @login_required # これ追加で未ログイン時ここに飛ばされない
 def memo_delete(request,pk):

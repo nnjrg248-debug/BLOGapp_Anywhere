@@ -49,7 +49,7 @@
                             {#--ここからAIボタン追加 フィールドが本文（textやcontent）の場合だけ表示--#}
                             {% if field.name == 'text' or field.name == 'content' %}
                             
-                                <button type="button" id="uploadBtn">画像をアップロード</button>
+                                <!--<button type="button" id="uploadBtn">画像をアップロード</button>-->
                                 <span id="fileName" style="margin-left:10px; color:#555;"></span>
                                 <input type="file" id="imageUpload" accept="image/*" style="display:none;">
                                 <div id="previewArea" style="margin-top:10px; display:none;"></div>                                <br>
@@ -115,7 +115,7 @@
 </div>
 
 <style>
-    
+  
     #previewArea {
         display: none;   /* ← 画像が無いときは完全に非表示 */
         margin-top:10px;

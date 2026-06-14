@@ -67,7 +67,8 @@
                         <a href="{% url 'memo_edit' pk=memo.pk %}?q={{ query }}&all_blogs={% if search_all %}1{% endif %}" class="btn btn-sm btn-outline-secondary me-2">編集</a>
                         <a href="{% url 'memo_delete' pk=memo.pk %}" class="btn btn-sm btn-outline-danger">削除</a>
                     {% else %}
-                        <a href="{% url 'memo_edit' pk=memo.pk %}?q={{ query }}&all_blogs={% if search_all %}1{% endif %}" class="btn btn-sm btn-outline-secondary me-2">記事をよむ</a>
+                        <a href="{% url 'memo_detail' pk=memo.pk %}?q={{ query }}&all_blogs={% if search_all %}1{% endif %}" class="btn btn-sm btn-outline-secondary me-2">記事をよむ</a>
+                    <!--「{% url 'memo_edit' pk=memo.pk %}?q={{ query }}&all_blogs=1」　とは　{% url 'memo_edit' pk=memo.pk %}を　memo.pk = 5 の/edit/5/がURLとなり?q={{ query }}&all_blogs=1　はそのクエリパラメタ（all_blogsは1（true）と 1以外の falseの2つしかない）　またq={{ query }}　と all_blogs=1　は詳細画面にいて戻ってきたときに検索内容を保持するためのパラメタで次の詳細画面で戻ると起用に用いられる（このパラメタがなかったら詳細画面行って戻ってきたとき検索は初期状態（検索せれてない状態）となる）　-->
                     {% endif %}
                 </div>
             </div>

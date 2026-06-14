@@ -1,0 +1,70 @@
+{% extends 'edit/base.html' %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-body">
+
+        <!-- タイトル行 -->
+        <div style="height:10px;">&nbsp;</div>
+        <div>
+            <span class="title-like-h2 d-inline-block">記事を読む</span>
+
+            <span class="text-secondary" style="font-size: 0.75rem; font-weight: bold;">
+                👤 {{ memo.author.username }}
+            </span>
+
+            <span class="badge bg-secondary" style="font-size: 0.7rem; font-weight: bold;">
+                {{ memo.created_at|date:"n/j" }}
+            </span>
+        </div>
+        <div style="height:10px;"></div>
+        <label class="form-label">{{ memo.title }}</label>
+        <hr>
+
+        <!-- 本文 -->
+        <div class="memo-content">
+            {{ memo.content|safe }}
+        </div>
+
+        <hr>
+
+        <!-- 戻るボタン -->
+        <a href="{% url 'memo_list' %}?q={{ request.GET.q }}&all_blogs={{ request.GET.all_blogs }}"
+           class="btn btn-secondary">戻る</a>
+
+        <!-- 本人以外のときだけ統計情報 -->
+        {% if request.user != memo.author %}
+            <hr>
+
+            <p class="text-muted">👁️ 閲覧数: {{ memo.views_count|default:0 }} 回</p>
+
+            <!-- いいね -->
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <button type="button" id="like-btn" class="btn btn-light" data-post-id="{{ memo.id }}">
+                    {% if liked_by_session %}❤️ 取消{% else %}🤍 いいね{% endif %}
+                </button>
+                <span><strong id="like-count">{{ memo.total_likes_count }}</strong> 人がいいねしています</span>
+            </div>
+
+            <!-- SNS シェア -->
+            <div style="display: flex; flex-direction: column; gap: 7px; margin-top: 10px;" class="mb-4">
+                <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri|urlencode }}&text={{ memo.title|urlencode }}"
+                   target="_blank" class="btn btn-dark w-100">
+                    Xでシェア
+                </a>
+
+                <a href="https://line.me/R/share?text={{ memo.title|urlencode }}%0A{{ request.build_absolute_uri|urlencode }}"
+                   target="_blank" class="btn btn-success w-100">
+                    LINEで送る
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+<style>
+      .form-label{
+       font-weight: bold;
+    }
+</style>
+{% endblock %}
