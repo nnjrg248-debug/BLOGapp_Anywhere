@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'django_summernote', 
 ]
 SITE_ID = 1
 AUTHENTICATION_BACKENDS = [
@@ -57,10 +58,11 @@ AUTHENTICATION_BACKENDS = [
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # --- allauthの細かい挙動設定 ---
-ACCOUNT_EMAIL_REQUIRED = True          # 登録時にメールアドレスを必須にする
+#ACCOUNT_EMAIL_REQUIRED = True          # 登録時にメールアドレスを必須にする
 ACCOUNT_EMAIL_VERIFICATION = "mandatory" # メール認証を「必須」にする（認証するまでログイン不可）
-ACCOUNT_AUTHENTICATION_METHOD = "username_email" # ユーザー名でもメールアドレスでもログイン可能にする
-
+#ACCOUNT_AUTHENTICATION_METHOD = "username_email" # ユーザー名でもメールアドレスでもログイン可能にする
+ACCOUNT_LOGIN_METHODS = {'username', 'email'}
+ACCOUNT_SIGNUP_FIELDS = ['username*', 'email*', 'password1*', 'password2*']
 #LOGIN_REDIRECT_URL = 'memo_list'       # ログイン後にリダイレクトするページ名
 
 #CCOUNT_LOGOUT_REDIRECT_URL ＝'/'
@@ -185,7 +187,11 @@ ACCOUNT_MESSAGES = False
 ACCOUNT_SITE_NAME = "nnjrg842ブログサポート"
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[nnjrg842ブログサポート] "
 DEFAULT_FROM_EMAIL = f"{ACCOUNT_SITE_NAME} <{EMAIL_HOST_USER}>"
-import os
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
 import warnings
 # 古いgoogle-generativeaiの非推奨警告を本番環境のログに出さないようにする設定
 warnings.filterwarnings("ignore", category=FutureWarning, module="google.generativeai")
