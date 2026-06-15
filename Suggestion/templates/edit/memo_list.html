@@ -61,7 +61,7 @@
                     </span>
                 </h5>
               
-                <p class="card-text text-secondary">{{ memo.content|truncatechars:50 }}</p>
+                <p class="card-text text-secondary">{{ memo.content|striptags|truncatechars:50 }}</p>
                 <div class="d-flex justify-content-end">
                     {% if user.is_authenticated and request.user == memo.author %}
                         <a href="{% url 'memo_edit' pk=memo.pk %}?q={{ query }}&all_blogs={% if search_all %}1{% endif %}" class="btn btn-sm btn-outline-secondary me-2">編集</a>

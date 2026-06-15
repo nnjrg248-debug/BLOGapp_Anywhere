@@ -29,7 +29,11 @@
         
 <!--↑form.instance.pkについて
     一番下に記載
- -->
+ -->                   
+         {% if error %}
+            <div class="alert alert-danger my-3">{{ error }}</div>
+        {% endif %}
+
         <!--<p id="error-message" style="color: red;">{{ form.title.errors.0 }}</p>-->
         <form method="POST">
             {% csrf_token %}

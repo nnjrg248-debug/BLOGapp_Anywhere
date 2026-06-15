@@ -33,8 +33,10 @@ urlpatterns=[
     #path('',views.memo_list,name='memo_list'),#上の「path('',PostListView.～」第一引数同じなのでその場合下の行は無視される
     path('list',views.memo_list,name='memo_list'),# name='memo_list'は href="{% url 'memo_list' %}"で呼ばれるが第一引数を変えることで第一引数がかぶらなくなったので問題なし
     path('memo/export/', views.memo_export, name='memo_export'), 
-    path('new/',views.memo_create,name='memo_create'),#関数ベース htmlから第3引数のボタン押されたら第1引数のURLで第2引数もメソッドが実行される　第一引数は単なるURLで表示される場所と覚える
-   
+    #path('new/',views.memo_create,name='memo_create'),#関数ベース htmlから第3引数のボタン押されたら第1引数のURLで第2引数もメソッドが実行される　第一引数は単なるURLで表示される場所と覚える
+   # path('new/', views.create_blog_post, name='memo_create'),
+   path('new/', views.memo_create, name='memo_create'),
+
     path('detail/<int:pk>/', views.memo_detail, name='memo_detail'),  # ← 閲覧専用 
 
     path('edit/<int:pk>',views.memo_edit,name='memo_edit'),
