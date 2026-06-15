@@ -245,7 +245,7 @@ def delete_account(request):
         
     return render(request, 'account/delete_account.html')
 
-@login_required
+#@login_required
 def ai_generate(request):
     try:
         #ユーザが入力した「タイトル」、「冒頭の分を取得」

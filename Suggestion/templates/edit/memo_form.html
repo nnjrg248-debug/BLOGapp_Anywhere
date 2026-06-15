@@ -152,102 +152,6 @@
 </style>
 
 {# JavaScriptを追加 #}
-<script>
-// 「画像をアップロード」ボタン → file input を開く
-/*
-document.getElementById("uploadBtn").addEventListener("click", function () {
-    document.getElementById("imageUpload").click();
-});
-*/
-
-// 画像選択時の処理（プレビュー + アップロード + 本文挿入）
-document.getElementById("imageUpload").addEventListener("change", async function () {
-    const file = this.files[0];
-    if (!file) return;
-
-    // ▼ プレビュー表示（アップロード前に即表示）
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const preview = document.getElementById("previewArea");
-        preview.style.display = "block";   // ← 画像があるときだけ表示
-        preview.innerHTML =
-            `<img src="${e.target.result}" style="max-width:200px; border:1px solid #ccc;">`;
-    };
-    reader.readAsDataURL(file);
-
-    // ▼ ファイル名を表示
-    document.getElementById("fileName").textContent = file.name;
-
-    // ▼ Django にアップロード
-    const formData = new FormData();
-    formData.append("image", file);
-
-    const response = await fetch("/upload-image/", {
-        method: "POST",
-        body: formData
-    });
-
-    const data = await response.json();
-    if (!data.url) {
-        alert("画像アップロードに失敗しました");
-        return;
-    }
-
-    // ▼ 本文に <img> を挿入
-    const textarea = document.getElementById("content");
-    const imgTag = `<img src="${data.url}" alt="">`;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const before = textarea.value.substring(0, start);
-    const after = textarea.value.substring(end);
-
-    textarea.value = before + imgTag + after;
-});
-</script>
-
-<script>
-// 「画像をアップロード」ボタン → file input を開く
-document.getElementById("uploadBtn").addEventListener("click", function () {
-    document.getElementById("imageUpload").click();
-});
-
-// 画像選択時の処理（アップロード + ファイル名表示 + 本文に挿入）
-document.getElementById("imageUpload").addEventListener("change", async function () {
-    const file = this.files[0];
-    if (!file) return;
-
-    // ファイル名を表示
-    document.getElementById("fileName").textContent = file.name;
-
-    // Django にアップロード
-    const formData = new FormData();
-    formData.append("image", file);
-
-    const response = await fetch("/upload-image/", {
-        method: "POST",
-        body: formData
-    });
-
-    const data = await response.json();
-    if (!data.url) {
-        alert("画像アップロードに失敗しました");
-        return;
-    }
-
-    // 本文に <img> を挿入
-    const textarea = document.getElementById("content");
-    const imgTag = `<img src="${data.url}" alt="">`;
-
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const before = textarea.value.substring(0, start);
-    const after = textarea.value.substring(end);
-
-    textarea.value = before + imgTag + after;
-});
-</script>
-
 
 <script>
 let aiUsed = false;
@@ -269,6 +173,7 @@ if (aiBtn) {
         }
 
         const currentText = textArea.value;
+        //const currentText = $('#id_content').summernote('code');
         const btn = this;
 
         btn.innerText = "AIが執筆中...";
@@ -279,7 +184,25 @@ if (aiBtn) {
             .then(response => response.json())
             .then(data => {
                 if (data.result) {
-                    textArea.value += (textArea.value ? "\n\n" : "") + data.result;
+                    //textArea.value += (textArea.value ? "\n\n" : "") + data.result;
+                    // 現在の内容を再取得（最新状態）
+                    const current = $('#id_content').summernote('code');
+
+                    // AIの返答を追加
+                    const newContent = current + "<br><br>" + data.result;
+
+                    // Summernote に反映
+                    $('#id_content').summernote('code', newContent);
+                    //$('#id_content') は “Summernote が変換した textarea（元のフォームフィールド）” 
+                    //jango の ModelForm で content フィールドを使うと、HTML では
+                    // <textarea id="id_content" name="content"></textarea>
+                    //Summernote はこの textarea を読み取り、次のように変換する：
+                    //textarea → 非表示（display:none）、代わりにリッチエディタ（div）を生成して表示
+                    //見えているエディタ → Summernote が生成した div、実際の値が入る場所 → #id_content（hidden textarea）
+                    //だから、JS で操作すべきは textarea の方（id_content）。
+
+
+
                 } else {
                     alert("AIから返答がありませんでした。APIの設定や残高を確認してください。");
                 }
