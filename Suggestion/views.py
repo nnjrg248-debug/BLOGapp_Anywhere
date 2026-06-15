@@ -245,7 +245,7 @@ def delete_account(request):
         
     return render(request, 'account/delete_account.html')
 
-
+@login_required
 def ai_generate(request):
     try:
         #ユーザが入力した「タイトル」、「冒頭の分を取得」
@@ -253,7 +253,7 @@ def ai_generate(request):
 
 
         #client = genai.Client(api_key=api_key_env)
-        #api_key_env = "AIzaSyDiISuhHbd9nFvW153SfGatSOtob8j24zQ"        
+         
         client = genai.Client(api_key=api_key_env)
         user_input=request.GET.get('text','')
 
