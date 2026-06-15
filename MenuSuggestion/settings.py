@@ -112,6 +112,7 @@ SUMMERNOTE_CONFIG = {
         'styleTags': ['p', 'br'],
     },
     'css': ('/static/summernote/custom.css',),
+    'lang': 'ja-JP',
 }
 
 # Internationalization
