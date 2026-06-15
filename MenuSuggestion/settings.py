@@ -143,8 +143,7 @@ EMAIL_HOST_USER = 'nnjrg842@gmail.com'
 DEFAULT_FROM_EMAIL = f"{ACCOUNT_SITE_NAME} <{EMAIL_HOST_USER}>"
 
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-if not EMAIL_HOST_PASSWORD:
-    EMAIL_HOST_PASSWORD = 'bnsv lqqm yypf kzsf'
+
 
 # Cloudflare R2 (S3互換ストレージ) 設定
 AWS_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID")
