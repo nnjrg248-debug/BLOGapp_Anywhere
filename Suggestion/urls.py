@@ -50,8 +50,8 @@ urlpatterns=[
     path('ai-generate/',views.ai_generate,name='ai_generate'),
     path('accounts/delete/', views.delete_account, name='account_delete'),
 
-    path('test-send/', views.test_email_view),
-    path('test/', views.test_email_view),
+    #path('test-send/', views.test_email_view),
+    #path('test/', views.test_email_view),
     path('inbound/', views.handle_inbound_email),
     
     path('handle_inbound_email/', views.handle_inbound_email, name='handle_inbound_email'),
