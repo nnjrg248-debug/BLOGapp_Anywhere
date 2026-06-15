@@ -270,13 +270,22 @@ def ai_generate(request):
 
         #ai_text=response.choices[0].message.content
         #ai_text = response.text
-        if hasattr(response, 'text'):
-            ai_text = response.text
-        else:
-            # 万が一古いライブラリが動いている場合のセーフティ
-            ai_text = response.candidates[0].content.parts[0].text
 
-        return JsonResponse({'result':ai_text})
+        #if hasattr(response, 'text'):
+        #    ai_text = response.text
+        #else:
+            # 万が一古いライブラリが動いている場合のセーフティ
+        #    ai_text = response.candidates[0].content.parts[0].text
+
+        #return JsonResponse({'result':ai_text})
+        try:
+            ai_text = response.text
+            return JsonResponse({'result': ai_text})
+
+        except Exception as e:
+            print(f"エラーが発生しました: {e}")
+            return JsonResponse({'error': str(e)}, status=500)
+
     except Exception as e:
             # ターミナルに具体的なエラー内容を表示させる
             print(f"エラーが発生しました: {e}")
