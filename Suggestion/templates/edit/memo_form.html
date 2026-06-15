@@ -39,8 +39,9 @@
             {% csrf_token %}
             {% for field in form %}<!--forms.ModelFormで'content': SummernoteWidget(),としてるのでfieldが豪華になる-->
                 <div class="mb-3">
-                    <label class="form-label">{{ field.label }}</label>
-                    <!--↑fieldについて
+              <!--      <label class="form-label">{{ field.label }}</label>
+                    
+                    ↑fieldについて
                         一番下に記載
                     -->
                    
@@ -186,12 +187,24 @@ if (aiBtn) {
                 if (data.result) {
                     //textArea.value += (textArea.value ? "\n\n" : "") + data.result;
                     // 現在の内容を再取得（最新状態）
-                    const current = $('#id_content').summernote('code');
+                    //const current = $('#id_content').summernote('code');
 
                     // AIの返答を追加
-                    const newContent = current + "<br><br>" + data.result;
+                    //const newContent = current + "<br><br>" + data.result;
 
                     // Summernote に反映
+                    //$('#id_content').summernote('code', newContent);
+                    // 現在の内容（HTML）を取得
+                    const current = $('#id_content').val();
+
+                    // AI の返答を追加
+                    const newContent = current + "<br><br>" + data.result;
+
+                    // textarea に直接セット
+                    $('#id_content').val(newContent);
+
+                    // Summernote の表示を更新
+                     
                     $('#id_content').summernote('code', newContent);
                     //$('#id_content') は “Summernote が変換した textarea（元のフォームフィールド）” 
                     //jango の ModelForm で content フィールドを使うと、HTML では
