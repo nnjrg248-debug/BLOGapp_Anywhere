@@ -138,9 +138,11 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 # Email Settings (Gmail SMTP)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
+EMAIL_PORT = 465#587
+
+EMAIL_USE_TLS =False #True
+EMAIL_USE_SSL =True #False
+
 EMAIL_HOST_USER = 'nnjrg842@gmail.com'
 DEFAULT_FROM_EMAIL = f"{ACCOUNT_SITE_NAME} <{EMAIL_HOST_USER}>"
 
