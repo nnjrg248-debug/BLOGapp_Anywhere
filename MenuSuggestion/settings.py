@@ -163,3 +163,7 @@ AWS_QUERYSTRING_AUTH = False  # ブログ閲覧用にURL認証期限を無効化
 # R2容量制限（無料枠超過防止用）
 MAX_FILE_SIZE = 2 * 1024 * 1024  # 1ファイル最大 2MB
 MAX_TOTAL_SIZE = 9.5 * 1024 * 1024 * 1024  # 全体最大 9.5GB
+
+SUMMERNOTE_CONFIG = {
+    'iframe': False,
+}

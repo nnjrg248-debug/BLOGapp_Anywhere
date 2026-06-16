@@ -250,36 +250,25 @@ def ai_generate(request):
     try:
         #ユーザが入力した「タイトル」、「冒頭の分を取得」
         api_key_env = os.getenv("GEMINI_API_KEY")
-
-
-        #client = genai.Client(api_key=api_key_env)
          
         client = genai.Client(api_key=api_key_env)
         user_input=request.GET.get('text','')
 
+    # --- 【修正】API呼び出しコメントアウト
+    #    # 2. 最新のモデル「gemini-2.5-flash」を呼び出す
+    #    response = client.models.generate_content(
+    #        model='gemini-2.5-flash',
+    #        contents=(
+    #            "あなたは優秀な漫才ライターです。ユーザーが入力した文章の続に、"
+    #            f"突っ込みいれてください：\n\n{user_input}"
+    #        )
+    #    )
 
-        # 2. 最新のモデル「gemini-2.5-flash」を呼び出す
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=(
-                "あなたは優秀な漫才ライターです。ユーザーが入力した文章の続に、"
-                f"突っ込みいれてください：\n\n{user_input}"
-            )
-        )
 
-
-        #ai_text=response.choices[0].message.content
-        #ai_text = response.text
-
-        #if hasattr(response, 'text'):
-        #    ai_text = response.text
-        #else:
-            # 万が一古いライブラリが動いている場合のセーフティ
-        #    ai_text = response.candidates[0].content.parts[0].text
-
-        #return JsonResponse({'result':ai_text})
         try:
-            ai_text = response.text
+            # --- 【修正】API呼び出しコメントアウト
+            #ai_text = response.text
+            ai_text = 'TEST'#response.text
             return JsonResponse({'result': ai_text})
 
         except Exception as e:

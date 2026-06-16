@@ -39,9 +39,8 @@
             {% csrf_token %}
             {% for field in form %}<!--forms.ModelFormで'content': SummernoteWidget(),としてるのでfieldが豪華になる-->
                 <div class="mb-3">
-              <!--      <label class="form-label">{{ field.label }}</label>
-                    
-                    ↑fieldについて
+                    <label class="form-label">{{ field.label }}</label>
+                    <!--↑fieldについて
                         一番下に記載
                     -->
                    
@@ -158,12 +157,21 @@
 let aiUsed = false;
 // ★変更点：非ログイン時にエラーでクラッシュしないよう、ボタンが存在するときだけ動かすガードを入れます
 const aiBtn = document.getElementById('ai-btn');
+
+
+
+
+
 if (aiBtn) {
-    aiBtn.addEventListener('click', function() {
+    aiBtn.addEventListener('click', function(e) {
+
+        e.preventDefault(); 
+        e.stopPropagation(); 
+
         if (aiUsed) {
             alert('もうしわけありません、使用できるの１回までです。')
             return;
-        }
+        }    
         aiUsed = true;
 
         const textArea = document.getElementById('id_text') || document.getElementById('id_content');
@@ -183,41 +191,43 @@ if (aiBtn) {
 
         fetch("{% url 'ai_generate' %}?text=" + encodeURIComponent(currentText))
             .then(response => response.json())
-            .then(data => {
+            .then(data => {                
+
+
                 if (data.result) {
-                    //textArea.value += (textArea.value ? "\n\n" : "") + data.result;
-                    // 現在の内容を再取得（最新状態）
-                    //const current = $('#id_content').summernote('code');
+                    // =======================================================
+                    // 【方針B 根本改修・最終形】iframe内の要素を直接狙い撃ちして書き換える
+                    // =======================================================
+                    
+                    // Djangoが生成したSummernoteのiframeを確実に取得
+                    const iframe = document.querySelector('iframe[id*="id_content"]');
+                    
+                    if (iframe && iframe.contentWindow) {
+                        // 1. 検証が成功したルートで、iframe内の入力エリア（DOM要素）を直接取得
+                        const targetEditor = iframe.contentWindow.document.querySelector('.note-editable');
+                        
+                        if (targetEditor) {
+                            // 2. 現在の入力内容（HTML文字列）を取得
+                            const current = targetEditor.innerHTML;
 
-                    // AIの返答を追加
-                    //const newContent = current + "<br><br>" + data.result;
+                            // 3. AIの返答（TEST）を結合した新しいHTMLを作成
+                            const newContent = current + "<br><br>" + data.result;
 
-                    // Summernote に反映
-                    //$('#id_content').summernote('code', newContent);
-                    // 現在の内容（HTML）を取得
-                    const current = $('#id_content').val();
+                            // 4. 入力エリアのHTMLを直接書き換える（これで画面の表示が変わります）
+                            targetEditor.innerHTML = newContent;
 
-                    // AI の返答を追加
-                    const newContent = current + "<br><br>" + data.result;
-
-                    // textarea に直接セット
-                    $('#id_content').val(newContent);
-
-                    // Summernote の表示を更新
-                     
-                    $('#id_content').summernote('code', newContent);
-                    //$('#id_content') は “Summernote が変換した textarea（元のフォームフィールド）” 
-                    //jango の ModelForm で content フィールドを使うと、HTML では
-                    // <textarea id="id_content" name="content"></textarea>
-                    //Summernote はこの textarea を読み取り、次のように変換する：
-                    //textarea → 非表示（display:none）、代わりにリッチエディタ（div）を生成して表示
-                    //見えているエディタ → Summernote が生成した div、実際の値が入る場所 → #id_content（hidden textarea）
-                    //だから、JS で操作すべきは textarea の方（id_content）。
-
-
+                            // 5. 【重要】Djangoが保存時に使う裏の非表示textarea（id_content）にも変更を同期させる
+                            const hiddenTextArea = document.getElementById('id_content');
+                            if (hiddenTextArea) {
+                                hiddenTextArea.value = newContent;
+                            }
+                        }
+                   
+                    }
 
                 } else {
-                    alert("AIから返答がありませんでした。APIの設定や残高を確認してください。");
+
+                  alert("AIから返答がありませんでした。APIの設定や残高を確認してください。");
                 }
             })
             .catch(error => {
