@@ -254,21 +254,21 @@ def ai_generate(request):
         client = genai.Client(api_key=api_key_env)
         user_input=request.GET.get('text','')
 
-    # --- 【修正】API呼び出しコメントアウト
+    
     #    # 2. 最新のモデル「gemini-2.5-flash」を呼び出す
-    #    response = client.models.generate_content(
-    #        model='gemini-2.5-flash',
-    #        contents=(
-    #            "あなたは優秀な漫才ライターです。ユーザーが入力した文章の続に、"
-    #            f"突っ込みいれてください：\n\n{user_input}"
-    #        )
-    #    )
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=(
+                "あなたは優秀な漫才ライターです。ユーザーが入力した文章の続に、"
+                f"突っ込みいれてください：\n\n{user_input}"
+            )
+        )
 
 
         try:
-            # --- 【修正】API呼び出しコメントアウト
-            #ai_text = response.text
-            ai_text = 'TEST'#response.text
+            
+            ai_text = response.text
+    #        ai_text = 'TEST'#response.text
             return JsonResponse({'result': ai_text})
 
         except Exception as e:

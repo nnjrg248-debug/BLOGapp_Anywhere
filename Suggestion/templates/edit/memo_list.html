@@ -6,17 +6,20 @@
 </div>
 <div class="row mb-4">
     <div class="col-md-6 offset-md-3">
-        <form method="GET" action="{% url 'memo_list' %}" class="d-flex gap-2" id="searchForm">
-            <input type="search" name="q" value="{{ request.GET.q }}" class="form-control py-3" style="font-size: 1.0rem;width:20rem;"placeholder="キーワードを入力してください..." aria-label="検索">
+        <form method="GET" action="{% url 'memo_list' %}" id="searchForm">
+            <div class="d-flex gap-2 mb-2">
+            <input type="search" name="q" value="{{ request.GET.q }}" class="form-control py-3" style="font-size: 1.0rem;width:25rem;"placeholder="キーワードを入力してください..." aria-label="検索">
             <button class="btn btn-outline-primary text-nowrap"style="font-size: 0.80rem" type="submit">検索</button>
-           
+            </div>
              <!-- 💡 ログインユーザーにだけ「すべてのブログから探す」チェックボックスを見せる -->
     {% if user.is_authenticated %}
     <div class="form-check text-start ms-1">
+    <div class="form-check text-start ms-1">
         <input class="form-check-input" type="checkbox" name="all_blogs" value="1" id="allBlogsCheck" {% if request.GET.all_blogs %}checked{% endif %}>
         <label class="form-check-label text-secondary small" for="allBlogsCheck">
-            すべてのユーザーのブログから検索する（チェックなしは自分のブログのみ）
+            すべてのユーザーのブログから検索する
         </label>
+    </div>
         <BR>
          {% if request.GET.q %}
             <a href="{% url 'memo_list' %}" class="btn btn-outline-secondary text-nowrap">クリア</a>
