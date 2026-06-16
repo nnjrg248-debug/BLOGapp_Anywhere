@@ -158,10 +158,6 @@ let aiUsed = false;
 // ★変更点：非ログイン時にエラーでクラッシュしないよう、ボタンが存在するときだけ動かすガードを入れます
 const aiBtn = document.getElementById('ai-btn');
 
-
-
-
-
 if (aiBtn) {
     aiBtn.addEventListener('click', function(e) {
 
@@ -221,13 +217,13 @@ if (aiBtn) {
                             if (hiddenTextArea) {
                                 hiddenTextArea.value = newContent;
                             }
-                        }
-                   
+                        }                   
                     }
-
+                    
                 } else {
 
-                  alert("AIから返答がありませんでした。APIの設定や残高を確認してください。");
+                  alert("AIから返答がありませんでした。アクセスが集中しているようです。");
+                  
                 }
             })
             .catch(error => {
