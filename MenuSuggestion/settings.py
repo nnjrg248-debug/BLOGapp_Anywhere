@@ -136,7 +136,7 @@ ACCOUNT_LOGOUT_REDIRECT_URL = 'post_list'
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Email Settings (Gmail SMTP)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587#465#587
 
@@ -144,9 +144,31 @@ EMAIL_USE_TLS =True#False #True
 EMAIL_USE_SSL =False #True #False
 
 EMAIL_HOST_USER = 'nnjrg842@gmail.com'
-DEFAULT_FROM_EMAIL = f"{ACCOUNT_SITE_NAME} <{EMAIL_HOST_USER}>"
+#DEFAULT_FROM_EMAIL = f"{ACCOUNT_SITE_NAME} <{EMAIL_HOST_USER}>"
 
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+#########################リセンドのメール設定なのでgmail設定に戻すこともあるのでgmailの設定は残しとく
+import os
+# 1. allauthのアカウント認証メール設定（既存の設定があれば確認してください）
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # 登録時にメール認証を必須にする場合
+# 2. メール送信バックエンドを Resend に指定
+EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+ANYMAIL = {
+    "RESEND_API_KEY": os.environ.get("RESEND_API_KEY"),
+}
+#DEFAULT_FROM_EMAIL = "onboarding@resend.dev"
+#ACCOUNT_EMAIL_FROM_EMAIL = "onboarding@resend.dev"
+DEFAULT_FROM_EMAIL = "noreply@1q1q.xyz"
+ACCOUNT_EMAIL_FROM_EMAIL = "noreply@1q1q.xyz"
+# --- django-allauth の基本設定 ---
+# ログインや認証の方法を指定します
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[BLIOGapp] " # メールの件名の頭に付く文字
+
 
 
 # Cloudflare R2 (S3互換ストレージ) 設定

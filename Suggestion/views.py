@@ -1,7 +1,7 @@
 import os  # 👈 追加：環境変数を扱うために必要
 from django.http import JsonResponse
 from dotenv import load_dotenv  # 👈 追加：.envファイルを読み込むライブラリ
-from google import genai  # 👈 Geminiの公式ライブラリ（環境に合わせて変更してください）
+import google.genai as google_genai  # 👈 Geminiの公式ライブラリ（環境に合わせて変更してください）
 
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Memo
@@ -376,8 +376,7 @@ def handle_inbound_email0(request):
 
 
 #import google.generativeai as genai
-import os
-from google import genai
+
 # Geminiの設定（本来はsettings.pyや環境変数に書くのが安全です）
 #genai.configure(api_key="AIzaSyDiISuhHbd9nFvW153SfGatSOtob8j24zQ")
 #model = genai.GenerativeModel('gemini-2.5-flash') # 高速・画像解析可能モデル
