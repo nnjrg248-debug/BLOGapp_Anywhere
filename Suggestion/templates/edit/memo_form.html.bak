@@ -1,0 +1,462 @@
+{% extends 'edit/base.html' %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-body">
+        
+        {% if form.instance.pk %}
+                {%  if user.is_authenticated and request.user == memo.author  %}
+                    <h2>Blogを編集</h2>
+                {% else %}
+                    <!-- 💡 横一列に並べるための外枠（親要素）を追加 -->
+                    <div style=" height:10px; border: 0px solid blue;">&nbsp;</div>
+                    <div class="  margin: 1000px 20px; ">
+                        <span class="title-like-h2 d-inline-block">記事を読む</span>
+
+                        <span class="text-secondary " style="font-size: 0.75rem;font-weight: bold;">
+                            👤 {{ memo.author.username }}
+                        </span>
+
+                        <span class="badge bg-secondary " style="font-size: 0.7rem;font-weight: bold;">
+                            {{ memo.created_at|date:"n/j" }}
+                        </span>
+                    </div>
+                    <div style="height:10px; outline: 0px solid red;">&nbsp;</div>
+                {% endif %}
+            {% else %}
+                <h2>新規作成</h2>
+            {% endif %}
+        
+<!--↑form.instance.pkについて
+    一番下に記載
+ -->                   
+         {% if error %}
+            <div class="alert alert-danger my-3">{{ error }}</div>
+        {% endif %}
+
+        <!--<p id="error-message" style="color: red;">{{ form.title.errors.0 }}</p>-->
+        <form method="POST">
+            {% csrf_token %}
+            {% for field in form %}<!--forms.ModelFormで'content': SummernoteWidget(),としてるのでfieldが豪華になる-->
+                <div class="mb-3">
+                    <label class="form-label">{{ field.label }}</label>
+                    <!--↑fieldについて
+                        一番下に記載
+                    -->
+                   
+                    <!-- ここでBootstrapのクラスを追加 -->
+                    <div class="form-control-wrapper">
+                        {{ field }}
+                    </div>
+                    {% if user.is_authenticated %} 
+                        {%  if not memo or request.user == memo.author %}
+                            {#--ここからAIボタン追加 フィールドが本文（textやcontent）の場合だけ表示--#}
+                            {% if field.name == 'text' or field.name == 'content' %}
+                            
+                                <!--<button type="button" id="uploadBtn">画像をアップロード</button>-->
+                                <span id="fileName" style="margin-left:10px; color:#555;"></span>
+                                <input type="file" id="imageUpload" accept="image/*" style="display:none;">
+                                <div id="previewArea" style="margin-top:10px; display:none;"></div>                                <br>
+                            
+                                <button type="button" id="ai-btn" class="btn btn-outline-primary btn-sm mt-2">
+                                    ✨ AIに続きを書いてもらう
+                                </button>
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                    {#--ここまで--#}               
+                
+                </div>
+            {% endfor %}
+            {# ========================================== #}
+            {# ボタンエリアの切り替え                      #}
+            {# ========================================== #}           
+
+            {% if user.is_authenticated %} 
+                {% if not memo or request.user == memo.author %}
+                    {# ログイン時かつ編集権限あり：保存して送信できる #}
+                    <button type="submit" class="btn btn-success">保存する</button>
+                    <a href="{% url 'memo_list' %}?q={{ request.GET.q }}&all_blogs={{ request.GET.all_blogs }}" class="btn btn-secondary">キャンセル</a>        
+                {% endif %}
+            {% else %}
+                {# 非ログイン時（または権限なし）：送信ボタンは置かない #}
+                <a href="{% url 'memo_list' %}?q={{ request.GET.q }}&all_blogs={{ request.GET.all_blogs }}" class="btn btn-secondary">戻る</a> 
+            {% endif %}      
+        </form> {# 常にここでフォームを閉じます #}
+        {# ========================================== #}
+        {# 本人以外時のみ表示する統計情報・SNSエリア  #}
+        {# ========================================== #}
+        {% if request.user != memo.author %}
+            <hr>
+            
+            <p class="text-muted">👁️ 閲覧数: {{ memo.views_count|default:0 }} 回</p>
+
+            {# いいね機能ボタン #}
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <button type="button" id="like-btn" class="btn btn-light" 
+                    data-post-id="{{ memo.id }}" 
+                    data-url="{% url 'like_post' post_id=memo.id %}" 
+                    data-csrf="{{ csrf_token }}">
+                    {% if liked_by_session %}❤️ 取消{% else %}🤍 いいね{% endif %}
+                </button>
+                <span><strong id="like-count">{{ memo.total_likes_count }}</strong> 人がいいねしています</span>
+            </div>
+            
+            {# SNSシェアボタン：間隔を空けて横並び #}
+            <div style="display: flex;flex-direction: column;  gap: 7px;margin-top: 10px;" class="mb-4">
+                            <!-- X (旧Twitter) シェアボタン -->
+                <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri|urlencode }}&text={{ memo.title|urlencode }}"
+                    target="_blank" class="btn btn-dark w-100">
+                    Xでシェア
+                </a>
+
+                <!-- LINE 送信ボタン -->
+                <a href="https://line.me/R/share?text={{ memo.title|urlencode }}%0A{{ request.build_absolute_uri|urlencode }}"
+                target="_blank" class="btn btn-success w-100">
+                    LINEで送る
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+<style>
+  
+    #previewArea {
+        display: none;   /* ← 画像が無いときは完全に非表示 */
+        margin-top:10px;
+    }
+    .title-like-h2 {
+        font-size: 1.5rem;   /* h2 と同等 */
+        font-weight: bold;
+        line-height: 1.2;
+    }
+
+
+    input, textarea { 
+        width: 100%; 
+        border: 1px solid #ced4da; 
+        border-radius: 0.375rem; 
+        padding: 0.375rem 0.75rem; 
+    }
+    /* 非ログイン時（編集不可）の入力欄の見た目を少しグレーにする
+    fieldset[disabled] input, fieldset[disabled] textarea {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    } */
+    .ai-used {
+        border-color: #6c757d !important;
+        color: #6c757d !important;
+        background-color: #e9ecef !important;
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+</style>
+
+{# JavaScriptを追加 #}
+
+<script>
+let aiUsed = false;
+// ★変更点：非ログイン時にエラーでクラッシュしないよう、ボタンが存在するときだけ動かすガードを入れます
+const aiBtn = document.getElementById('ai-btn');
+
+if (aiBtn) {
+    aiBtn.addEventListener('click', function(e) {
+
+        e.preventDefault(); 
+        e.stopPropagation(); 
+
+        if (aiUsed) {
+            alert('もうしわけありません、使用できるの１回までです。')
+            return;
+        }    
+        aiUsed = true;
+
+        const textArea = document.getElementById('id_text') || document.getElementById('id_content');
+        
+        if (!textArea) {
+            alert("入力欄が見つかりませんでした。");
+            return;
+        }
+
+        const currentText = textArea.value;
+        //const currentText = $('#id_content').summernote('code');
+        const btn = this;
+
+        btn.innerText = "AIが執筆中...";
+        btn.disabled = true;
+        btn.classList.add("ai-used");  
+
+        fetch("{% url 'ai_generate' %}?text=" + encodeURIComponent(currentText))
+            .then(response => response.json())
+            .then(data => {                
+
+
+                if (data.result) {
+                    // =======================================================
+                    // 【方針B 根本改修・最終形】iframe内の要素を直接狙い撃ちして書き換える
+                    // =======================================================
+                    
+                    // Djangoが生成したSummernoteのiframeを確実に取得
+                    const iframe = document.querySelector('iframe[id*="id_content"]');
+                    
+                    if (iframe && iframe.contentWindow) {
+                        // 1. 検証が成功したルートで、iframe内の入力エリア（DOM要素）を直接取得
+                        const targetEditor = iframe.contentWindow.document.querySelector('.note-editable');
+                        
+                        if (targetEditor) {
+                            // 2. 現在の入力内容（HTML文字列）を取得
+                            const current = targetEditor.innerHTML;
+
+                            // 3. AIの返答（TEST）を結合した新しいHTMLを作成
+                            const newContent = current + "<br><br>" + data.result;
+
+                            // 4. 入力エリアのHTMLを直接書き換える（これで画面の表示が変わります）
+                            targetEditor.innerHTML = newContent;
+
+                            // 5. 【重要】Djangoが保存時に使う裏の非表示textarea（id_content）にも変更を同期させる
+                            const hiddenTextArea = document.getElementById('id_content');
+                            if (hiddenTextArea) {
+                                hiddenTextArea.value = newContent;
+                            }
+                        }                   
+                    }
+                    
+                } else {
+
+                  alert("AIから返答がありませんでした。アクセスが集中しているようです。");
+                  
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("エラーが発生しました。URL設定などを確認してください。");
+            })
+            .finally(() => {
+                btn.innerText = "✨ AIに続きを書いてもらう";
+                btn.disabled = false;
+            });
+    });
+}
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const errorMessage = document.getElementById('error-message');
+    if (errorMessage && errorMessage.innerText.trim() !== "") {
+        document.addEventListener('click', function() {
+            errorMessage.style.display = 'none';
+        }, { once: true });
+
+        document.addEventListener('keydown', function() {
+            errorMessage.style.display = 'none';
+        }, { once: true });
+    }
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const errorText = "{{ form.title.errors.0|escapejs }}";
+    if (errorText.trim() !== "") {
+        alert(errorText);
+    }
+});
+</script>
+
+<script>
+// cookieからCSRFトークンを取得する関数（Djangoの標準的な方法）
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+// ★変更点：非ログイン時（いいねボタンがあるとき）だけイベントを設定するガードを入れます
+
+document.addEventListener('DOMContentLoaded', function() {
+    const likeBtn = document.getElementById('like-btn');
+    
+    if (likeBtn) {
+        likeBtn.addEventListener('click', function() {
+            // HTMLの属性から正しいURLとCSRFトークンを取得
+            const targetUrl = this.getAttribute('data-url');
+            const csrfToken = this.getAttribute('data-csrf');
+            
+            if (!targetUrl) {
+                console.error('URLが取得できませんでした。');
+                return;
+            }
+
+            fetch(targetUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('サーバー通信エラー（ステータス: ' + response.status + '）');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                } else {
+                    // 表示を更新
+                    this.textContent = data.liked ? '❤️ 取消' : '🤍 いいね';
+                    const likeCountEl = document.getElementById('like-count');
+                    if (likeCountEl) {
+                        likeCountEl.textContent = data.total_likes;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Fetchエラー:', error);
+            });
+        });
+    }
+});
+
+/*
+const likeBtn = document.getElementById('like-btn');
+if (likeBtn) {
+    likeBtn.addEventListener('click', function() {
+        const postId = this.getAttribute('data-post-id');
+        
+        // 修正前: fetch(`/post/${postId}/like/`, {
+        // 修正後: 先頭にスラッシュを入れた絶対パス、または /post/ から始まる完全なパスを明示
+        fetch(`${window.location.origin}/post/${postId}/like/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+            } else {
+                this.textContent = data.liked ? '❤️ 取消' : '🤍 いいね';
+                document.getElementById('like-count').textContent = data.total_likes;
+            }
+        });
+    });
+}
+    */
+</script>
+
+{% endblock %}
+
+<!--上記 { for field in form }のfieldについて
+views.pyより
+return render(request,'edit/memo_form.html',{'form':form})、return render(request,'edit/memo_form.html',{'form':form})
+としてformが渡されており、HTML側ではform を 「複数の項目の集まり（リストのようなもの）」 として扱う
+for 文で「1つずつ取り出されたもの」が field
+-->
+<!--上記
+ <h2>{ if form.instance.pk }メモを編集{ else }新規作成{ endif }</h2>
+ について
+これは（遷移前の）htmlファイルの遷移先のボタン内に
+遷移先に相当するurlに加え、行番号のidに相当する引数
+が入っていていて、それらを引数として受け取ったformであれば　メモを編集
+そうでなければ　新規作成　と考えたが
+
+実際はurlsのpathの第一引数(に定義する）URLにPKとしての番号が入っているか　で判定しているとのことで
+
+結論から言うと、form.instance は 「URL（path）そのもの」ではなく、「URLのIDを使って、データベースから取り出してきた
+『1件分のデータ本体』とのこと
+
+
+edit/views.pyの
+def memo_edit(request,pk):、def memo_create(request):　を比べて
+
+注：GET、POSTの違い：表示するだけ（GET）、保存したい（POST）の違い
+request.POST：画面の入力欄に書かれた「最新の書き込み内容」
+if request.method == "POST"：「この注文書(request)は、単に画面を見るため？ それとも保存ボタンを押したから？」というチェック
+form = MemoForm(request.POST, instance=memo)：
+    instance=memo: 「土台は『古いデータ（5番）』だよ」　 （memo=get_object_or_404(Memo,pk=pk)という代入なので）
+    request.POST：画面の入力欄に書かれた「最新の書き込み内容」
+form=MemoForm(request.POST)：
+    request.POST：画面の入力欄に書かれた「最新の書き込み内容」   
+form.instance は 「URL（path）そのもの」ではなく、「URLのIDを使って、データベースから取り出してきた『1件分のデータ本体』
+
+注：（上記関数ベースで）最初に型として、form=model(設計したテーブル1件分のデータ)を代入されているので
+form.instanceは型として代入された設計したテーブル1件分のデータということで、土台と表現している
+
+
+-->
+
+<!--上記 { for field in form }(←%つけるとエラーになるので取っている)のfieldについて
+class Memo(models.Model):
+    title = models.CharField(max_length=200)  # タイトル（最大200文字）
+    content = models.TextField()               # メモ本文
+    created_at = models.DateTimeField(auto_now_add=True)  # 作成日時（自動設定）
+    updated_at = models.DateTimeField(auto_now=True)      # 更新日時（自動設定）
+
+    class Meta:
+        db_table='Memo'
+        
+    def __str__(self):
+        return self.title
+    
+    
+というテーブルmemoがformに代入されてるが
+content = models.TextField() というTextFieldフィールドが2つ以上またはなかったらどうなるのか
+
+TextField（や他の項目）が2つ以上ある場合
+
+例えば、content 以外に summary（概要）という項目を増やしたとき
+
+この場合、HTMLの { for field in form } は、自動的に3回ループします。
+1回目：title の入力欄（<input type="text">）
+2回目：summary の入力欄（<textarea>）
+3回目：content の入力欄（<textarea>）
+つまり、あなたがHTMLを書き直さなくても、モデルを書き換えるだけで画面上の入力欄も勝手に増えるのがDjangoの便利なところです。
+2. TextField が一つもない場合
+もし content を消して title だけにした場合、ループは 1回（title分だけ） になります。
+
+3. 「作成日時」などはどうなるの？
+モデルには created_at や updated_at もありますが、これらは通常、画面には出てきません。
+理由：これらは auto_now_add=True などが付いており、「ユーザーが手入力するものではない」 とDjangoが知っているからです。
+結果：form の中には含まれず、{ for field in form } のループでも無視されます。
+
+
+上記コーディングでは
+l15　field.label
+l20　field
+
+となってるがl15　field.labelがない場合は
+l20　fieldにtilte,contentに2フィールドが表示される
+
+{{field.label}}であればCharField
+{{field}}であればTextField
+またはCharField、TextFieldの両方
+（CharFieldがすでに出ていなかったらTextFieldのみ）
+またCharFieldの時は inputタグ（1行）
+fieldの時はtextareaタグ（複数行）
+
+という
+
+
+
+
+
+
+
+
+
+
+-->

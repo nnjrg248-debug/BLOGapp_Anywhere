@@ -189,3 +189,6 @@ MAX_TOTAL_SIZE = 9.5 * 1024 * 1024 * 1024  # 全体最大 9.5GB
 SUMMERNOTE_CONFIG = {
     'iframe': False,
 }
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
