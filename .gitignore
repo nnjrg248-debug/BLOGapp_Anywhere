@@ -1,3 +1,4 @@
 edit/views001.py
 .env
 secret_key.txt
+db.sqlite3
